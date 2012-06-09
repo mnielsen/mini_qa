@@ -146,21 +146,31 @@ def remove_all(elt, l):
     return filter(lambda x: x != elt, l)
 
 def candidate_answers(sentence, query):
-    split_sentence = sentence.split()
-    split_sentence = filter(lambda x: x.lower() not in query, split_sentence)
-    return [(x,) for x in split_sentence]+\
-        [(split_sentence[j], split_sentence[j+1]) \
-         for j in range(len(split_sentence)-1)]+ \
-        [(split_sentence[j], split_sentence[j+1], split_sentence[j+2]) \
-         for j in range(len(split_sentence)-2)]
+    """
+    Return all the 1-, 2-, and 3-grams in `sentence`.  Terms appearing
+    in `query` are filtered out.
+    """
+    filtered_sentence = filter(lambda x: x.lower() not in query, sentence.split())
+    return [(x,) for x in filtered_sentence]+\
+        [(filtered_sentence[j], filtered_sentence[j+1]) \
+         for j in range(len(filtered_sentence)-1)]+ \
+        [(filtered_sentence[j], filtered_sentence[j+1], filtered_sentence[j+2]) \
+         for j in range(len(filtered_sentence)-2)]
 
 def ngram_score(ngram, score):
-    for word in ngram:
-        if is_capitalized(word):
-            score = score * 3
-    return score
+    """
+    Return the score associated to `ngram`.  The base score is
+    `score`, but it's modified by a factor which is 3 to the power of
+    the number of capitalized words.  This is a way of biasing answers
+    toward proper nouns.
+    """
+    capitalized_words = [word for word in ngram if is_capitalized(word)]    
+    return score * (3**len(capitalized_words))
 
 def is_capitalized(word):
+    """
+    Return True or False according to whether `word` is capitalized.
+    """
     return word == word.capitalize()
 
 if __name__ == "__main__":
