@@ -30,10 +30,11 @@ test("tokenize(\"Who is the world\'s    no. 1 tennis player?\")",
 test("remove_spurious_words('This is a Cached version of something Similar to a regular sentence')", 
      "'This is a  version of something  to a regular sentence'")
 
-test("remove_all(3, [1, 7, 3, 2, 4, 6, 3])", "[1, 7, 2, 4, 6]")
-
 test("candidate_answers('The quick brown fox jumped over the lazy grey dogs', ('brown', 'dogs'))", 
      "[('The',), ('quick',), ('fox',), ('jumped',), ('over',), ('the',), ('lazy',), ('grey',), ('The', 'quick'), ('quick', 'fox'), ('fox', 'jumped'), ('jumped', 'over'), ('over', 'the'), ('the', 'lazy'), ('lazy', 'grey'), ('The', 'quick', 'fox'), ('quick', 'fox', 'jumped'), ('fox', 'jumped', 'over'), ('jumped', 'over', 'the'), ('over', 'the', 'lazy'), ('the', 'lazy', 'grey')]")
+
+test("ngrams(['the', 'quick', 'brown'], 2)", 
+     "[('the', 'quick'), ('quick', 'brown')]")
 
 test("ngram_score(('Hello', 'there'), 7)", "21")
 

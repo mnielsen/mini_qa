@@ -1,4 +1,4 @@
-#### mini_qa.py
+ #### mini_qa.py
 #
 # By Michael Nielsen, 2012
 #
@@ -55,7 +55,7 @@ def qa(question):
                 for ngram in candidate_answers(sentence, query.query):
                     answer_scores[ngram] += ngram_score(ngram, query.score)
     return sorted(
-            answer_scores.iteritems(), key=operator.itemgetter(1), reverse=True)
+            answer_scores.iteritems(), key=lambda x: x[1], reverse=True)
 
 def rewritten_queries(question):
     """
@@ -65,11 +65,12 @@ def rewritten_queries(question):
     rewrites = [] # where we'll store our list of RewrittenQuery objects
     tq = tokenize(question)
     verb = tq[1] # the simplest assumption, something to improve
-    rewrites.append(RewrittenQuery(verb+" "+" ".join(tq[2:]), 5))
+    rewrites.append(
+        RewrittenQuery("%s %s" % (verb, " ".join(tq[2:])), 5))
     for j in range(2, len(tq)):
         rewrites.append(
             RewrittenQuery(
-                " ".join(tq[2:j+1])+" "+verb+" "+string.join(tq[j+1:]),
+                "%s %s %s" % (" ".join(tq[2:j+1]), verb, " ".join(tq[j+1:])),
                 5))
     rewrites.append(RewrittenQuery(" ".join(tq[2:]), 2))
     return rewrites
@@ -113,7 +114,7 @@ def sentences(summary):
     only, no punctuation.
     """
     text = remove_spurious_words(text_of(summary))
-    sentences = remove_all("", text.split("."))
+    sentences = [sentence for sentence in text.split(".") if sentence]
     return [re.sub(r"[^a-zA-Z ]", "", sentence) for sentence in sentences]
 
 def text_of(soup):
@@ -121,11 +122,8 @@ def text_of(soup):
     Return the text associated to the BeautifulSoup.BeautifulSoup
     object `soup`.
     """
-    text_soup = soup.findAll(text=True)
-    if text_soup:
-        return ''.join(soup.findAll(text=True))
-    else:
-        return ''
+    text_soup = str(soup.findAll(text=True))
+    return ''.join(soup.findAll(text=True))
 
 def remove_spurious_words(text):
     """
@@ -139,23 +137,25 @@ def remove_spurious_words(text):
         text = text.replace(word, "")
     return text
 
-def remove_all(elt, l):
-    """
-    Returns the list `l` with all entries `elt` deleted.
-    """
-    return filter(lambda x: x != elt, l)
-
 def candidate_answers(sentence, query):
     """
     Return all the 1-, 2-, and 3-grams in `sentence`.  Terms appearing
-    in `query` are filtered out.
+    in `query` are filtered out.  Note that the n-grams are returned
+    as a list of tuples.  So a 1-gram is a tuple with 1 element, a
+    2-gram has 2 elements, and so on.
     """
-    filtered_sentence = filter(lambda x: x.lower() not in query, sentence.split())
-    return [(x,) for x in filtered_sentence]+\
-        [(filtered_sentence[j], filtered_sentence[j+1]) \
-         for j in range(len(filtered_sentence)-1)]+ \
-        [(filtered_sentence[j], filtered_sentence[j+1], filtered_sentence[j+2]) \
-         for j in range(len(filtered_sentence)-2)]
+    filtered_sentence = [x for x in sentence.split() if x.lower() not in query]
+    return ngrams(filtered_sentence, 1)+\
+        ngrams(filtered_sentence, 2)+\
+        ngrams(filtered_sentence, 3)
+
+def ngrams(words, n=1):
+    """
+    Return all the `n`-grams in the list `words`.  The n-grams are
+    returned as a list of tuples, each tuple containing an n-gram, as
+    per the description in `candidate_answers`.
+    """
+    return [tuple(words[j:j+n]) for j in xrange(len(words)-n+1)]
 
 def ngram_score(ngram, score):
     """
@@ -164,8 +164,8 @@ def ngram_score(ngram, score):
     the number of capitalized words.  This is a way of biasing answers
     toward proper nouns.
     """
-    capitalized_words = [word for word in ngram if is_capitalized(word)]    
-    return score * (3**len(capitalized_words))
+    num_capitalized_words = sum(1 for word in ngram if is_capitalized(word)) 
+    return score * (3**num_capitalized_words)
 
 def is_capitalized(word):
     """
@@ -175,12 +175,11 @@ def is_capitalized(word):
 
 if __name__ == "__main__":
     pretty_qa("Who ran the first four-minute mile?")
-    pretty_qa("Who killed Abraham Lincoln?")
+    pretty_qa("Who makes the best pizza in New York?")
     pretty_qa("Who invented the C programming language?")
-    pretty_qa("Who invented relativity?")
+    pretty_qa("Who wrote the Iliad?")
     pretty_qa("Who caused the financial crash of 2008?")
     pretty_qa("Who caused the Great Depression?")
     pretty_qa("Who is the most evil person in the world?")
-    pretty_qa("Who wrote the poems of Wiliam Shakespeare?")
-    pretty_qa("Who shot Kennedy?")
+    pretty_qa("Who wrote the plays of Wiliam Shakespeare?")
     pretty_qa("Who is the world's best tennis player?")
