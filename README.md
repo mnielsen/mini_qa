@@ -11,7 +11,8 @@ researchers at Microsoft Research.  The original paper is:
 Brill, Lin, Banko, Dumais and Ng, "Data-Intensive Question
 Answering" (2001).
 
-I've described background to this program [http://michaelnielsen.org/ddi/how-to-answer-a-question-v1/](here).
+I've described background to this program
+[here](http://michaelnielsen.org/ddi/how-to-answer-a-question-v1/).
 
 # Note on contributions and pull requests
 
