@@ -9,8 +9,7 @@ from mini_qa import *
 failed_tests = 0
 
 def test(code, result=None):
-    print
-    print "Testing: "+code
+    print "\nTesting: "+code
     if result: print "Expecting: "+result
     print "Output: %s" % eval(code)
     if result:
