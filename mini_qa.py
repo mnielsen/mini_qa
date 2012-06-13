@@ -12,7 +12,7 @@
 #
 # I've described background to this program here:
 #
-# http://michaelnielsen.org/ddi/how-to-answer-a-question-v1/
+# http://www.michaelnielsen.org/ddi/how-to-answer-a-question-a-simple-system/
 
 #### Copyright and licensing
 #

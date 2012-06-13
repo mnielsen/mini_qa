@@ -12,7 +12,7 @@ Brill, Lin, Banko, Dumais and Ng, "Data-Intensive Question
 Answering" (2001).
 
 I've described background to this program
-[here](http://michaelnielsen.org/ddi/how-to-answer-a-question-v1/).
+[here](http://www.michaelnielsen.org/ddi/how-to-answer-a-question-a-simple-system/).
 
 # Note on contributions and pull requests
 
