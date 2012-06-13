@@ -170,9 +170,7 @@ def candidate_answers(sentence, query):
     """
     filtered_sentence = [word for word in sentence.split() 
                          if word.lower() not in query]
-    return ngrams(filtered_sentence, 1)+\
-        ngrams(filtered_sentence, 2)+\
-        ngrams(filtered_sentence, 3)
+    return sum([ngrams(filtered_sentence, j) for j in range(1,4)], [])
 
 def ngrams(words, n=1):
     """
