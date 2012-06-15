@@ -1,3 +1,5 @@
 *~
 *.org
 *.pyc
+setup.sh
+ec2.py

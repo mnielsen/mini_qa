@@ -46,6 +46,7 @@ __all__ = ['search']
 import BeautifulSoup
 import cookielib
 import os
+import random
 import time
 import urllib
 import urllib2
