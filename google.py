@@ -158,7 +158,7 @@ def search(query, tld='com', lang='en', num=10, start=0, stop=None, pause=10.0):
         parameter is C{None} the iterator will loop forever.
     """
     # pause, so as to not overburden google
-    time.sleep(pause)
+    time.sleep(pause+(random.random()-0.5)*5)
 
     # Set of hashes for the results found.
     # This is used to avoid repeated results.
