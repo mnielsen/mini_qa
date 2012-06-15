@@ -27,7 +27,7 @@ def main():
         cr = correct_results(answers(qa_pair.question), qa_pair.answers)
         if 0 in cr:
             perfect_answers += 1
-        if len(correct_results) > 0:
+        if len(cr) > 0:
              okay_answers += 1
     print "%s had a correct answer in the top 20" % okay_answers
     print "%s returned a perfect answer" % perfect_answers
