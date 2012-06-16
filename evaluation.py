@@ -66,7 +66,7 @@ def correct_results(candidate_answers, acceptable_answers):
     `candidate_answers` which are also in the list of
     `acceptable_answers`.
     """
-    return [j for (j, answer) in enumerate(acceptable_answers)
+    return [j for (j, answer) in enumerate(candidate_answers)
             if answer in acceptable_answers]
 
 if __name__ == "__main__":
