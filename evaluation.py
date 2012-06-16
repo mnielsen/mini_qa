@@ -67,7 +67,7 @@ def correct_results(candidate_answers, acceptable_answers):
     `acceptable_answers`.
     """
     return [j for (j, answer) in enumerate(acceptable_answers)
-            if answer in correct_answers]
+            if answer in acceptable_answers]
 
 if __name__ == "__main__":
     main()
