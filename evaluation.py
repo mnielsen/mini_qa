@@ -25,6 +25,7 @@ def main():
     print "Generating candidate answers for",
     print "%s questions" % num_questions
     for qa_pair in qa_pairs:
+        print qa_pair.question
         cr = correct_results(answers(qa_pair.question), qa_pair.answers)
         if 0 in cr:
             perfect_answers += 1
