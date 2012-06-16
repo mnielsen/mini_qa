@@ -34,7 +34,7 @@ def main():
              rank_sum += cr[0]
     print "{} had a correct answer in the top 20 ({:.2%})".format(
         okay_answers, float(okay_answers) / num_questions)
-    print "{} average rank for answers in the top 20".format(
+    print "Average rank for answers in the top 20: {:.2f}".format(
         float(rank_sum) / okay_answers)
     print "{} returned a perfect answer ({:2%})".format(
         perfect_answers, float(perfect_answers) / num_questions)
@@ -56,9 +56,6 @@ def answers(question):
 def correct_results(candidate_answers, correct_answers):
     return [j for (j, answer) in enumerate(candidate_answers)
             if answer in correct_answers]
-
-def okay_answers(qa_pairs_answers):
-    pass
 
 if __name__ == "__main__":
     main()
