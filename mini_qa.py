@@ -122,7 +122,7 @@ def text_of(soup):
     Return the text associated to the BeautifulSoup.BeautifulSoup
     object `soup`.
     """
-    return ''.join(str(soup.findAll(text=True)))
+    return ''.join([str(x) for x in soup.findAll(text=True)])
 
 def remove_spurious_words(text):
     """
