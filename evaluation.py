@@ -22,8 +22,7 @@ def main():
     okay_answers = 0
     rank_sum = 0
     num_questions = len(qa_pairs)
-    print "Generating candidate answers for",
-    print "%s questions" % num_questions
+    print "Generating candidate answers for %s questions" % num_questions
     for qa_pair in qa_pairs:
         print qa_pair.question
         cr = correct_results(answers(qa_pair.question), qa_pair.answers)
@@ -31,6 +30,7 @@ def main():
             perfect_answers += 1
         if len(cr) > 0:
              okay_answers += 1
+             print "Rank of top answer: %s" % cr[0]
              rank_sum += cr[0]
     print "{} had a correct answer in the top 20 ({:.2%})".format(
         okay_answers, float(okay_answers) / num_questions)
