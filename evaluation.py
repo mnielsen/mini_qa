@@ -33,11 +33,11 @@ def main():
              okay_answers += 1
              rank_sum += cr[0]
     print "{} had a correct answer in the top 20 ({:.2%})".format(
-        okay_answers, okay_answers / num_questions)
+        okay_answers, float(okay_answers) / num_questions)
     print "{} average rank for answers in the top 20".format(
         float(rank_sum) / okay_answers)
     print "{} returned a perfect answer ({:2%})".format(
-        perfect_answers, perfect_answers / num_questions)
+        perfect_answers, float(perfect_answers) / num_questions)
 
 def load_qa_pairs():
     """
