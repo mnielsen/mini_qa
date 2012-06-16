@@ -51,7 +51,7 @@ def get_running_instance():
                          if instance.update() == u"running"]
     return running_instances[0]
 
-def ssh_cmd():
+def login_cmd():
     """
     Find a running EC2 instance and login.
     """
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     arg = sys.argv[1]
     if arg == "stop":
         stop()
-    elif arg == "ssh":
-        ssh_cmd()
+    elif arg == "login":
+        login_cmd()
     else: # start
         start()
