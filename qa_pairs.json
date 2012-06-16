@@ -1,4 +1,6 @@
-[{"question": "Who founded Google?", 
+[{"question": "Who beat Carl Lewis in the 1988 Olympic hundred meters?",
+"answers": ["Ben Johnson"]},
+{"question": "Who founded Google?", 
 "answers": ["Larry Page", "Sergey Brin", "Page and Brin", "Brin and Page",
 	   "Larry Page and Sergey Brin", "Sergey Brin and Larry Page"]},
 {"question": "Who ran the first four-minute mile?",
