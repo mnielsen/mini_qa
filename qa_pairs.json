@@ -2,7 +2,7 @@
 "answers": ["the Beatles"]},
 {"question": "Who killed John Lennon?",
 "answers": ["Mark Chapman", "Mark David Chapman"]},
-{"question": "Who founded the Ubuntu Foundation?"],
+{"question": "Who founded the Ubuntu Foundation?",
 "answers": ["Mark Shuttleworth"]},
 {"question": "Who first circumnavigated the Earth?",
 "answers": ["Ferdinand Magellan", "Magellan"]},
