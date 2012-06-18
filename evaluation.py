@@ -19,6 +19,15 @@ class QAPair():
 
 def main():
     qa_pairs = load_qa_pairs()
+    evaluate_google_qa(qa_pairs)
+    evaluate_wolfram_qa(qa_pairs)
+
+def evaluate_google_qa(qa_pairs):
+    """
+    Evaluate the performance of the question-answering system based on
+    Google.\n\n
+    """
+    print evaluate_google_qa.__doc__
     perfect_answers = 0
     okay_answers = 0
     rank_sum = 0
@@ -68,6 +77,23 @@ def correct_results(candidate_answers, acceptable_answers):
     """
     return [j for (j, answer) in enumerate(candidate_answers)
             if answer in acceptable_answers]
+
+def evaluate_wolfram_qa(qa_pairs):
+    """
+    Evaluate the performance of the question-answering system based on
+    Wolfram Alpha.\n\n
+    """
+    print evaluate_wolfram_qa.__doc__
+    perfect_answers = 0
+    num_questions = len(qa_pairs)
+    print "Generating candidate answers for %s questions" % num_questions
+    for (j, qa_pair) in enumerate(qa_pairs):
+        print "Processing question %s" % j
+        wolfram_answer = mini_qa.wolfram_answer(qa_pair.question)
+        if wolfram_answer in qa_pair.answers:
+            perfect_answers += 1
+    print "{} returned a perfect answer ({:2%})".format(
+        perfect_answers, float(perfect_answers) / num_questions)
 
 if __name__ == "__main__":
     main()

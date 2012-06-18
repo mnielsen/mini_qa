@@ -1,4 +1,5 @@
 *~
 *.org
 *.pyc
+config.py
 setup.sh

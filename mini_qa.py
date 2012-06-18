@@ -16,24 +16,35 @@
 
 #### Library imports
 
+import config
+
 # standard library
 from collections import defaultdict
+import json
 import re
+from xml.etree import ElementTree
 
 # third-party libraries
 from google import search
+import wolfram
 
-def pretty_qa(question, num=10):
+#### Config
+
+wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
+
+ 
+
+def pretty_qa(question, source="google", num=10):
     """
     Wrapper for the `qa` function.  `pretty_qa` prints the `num`
     highest scoring answers to `question`, with the scores in
     parentheses.
     """
     print "\nQ: "+question
-    for (j, (answer, score)) in enumerate(qa(question)[:num]):
+    for (j, (answer, score)) in enumerate(qa(question, source)[:num]):
         print "%s. %s (%s)" % (j+1, " ".join(answer), score)
 
-def qa(question):
+def qa(question, source="google"):
     """
     Return a list of tuples whose first entry is a candidate answer to
     `question`, and whose second entry is the score for that answer.
@@ -42,7 +53,7 @@ def qa(question):
     """
     answer_scores = defaultdict(int)
     for query in rewritten_queries(question):
-        for summary in get_google_summaries(query.query):
+        for summary in get_summaries(query.query, source):
             for sentence in sentences(summary):
                 for ngram in candidate_answers(sentence, query.query):
                     answer_scores[ngram] += ngram_score(ngram, 
@@ -95,13 +106,13 @@ class RewrittenQuery():
         self.score = score
 
 
-def get_google_summaries(query):
+def get_summaries(query, source="google"):
     """
-    Return a list of the top 10 summaries associated to the Google
-    results for `query`.  Returns all available summaries if there are
-    fewer than 10 summaries available.  Note that these summaries are
-    returned as BeautifulSoup.BeautifulSoup objects, and may need to
-    be manipulated further to extract text, links, etc.
+    Return a list of the top 10 summaries associated to the results
+    for `query` returned by `source`.  Returns all available summaries
+    if there are fewer than 10 summaries available.  Note that these
+    summaries are returned as BeautifulSoup.BeautifulSoup objects, and
+    may need to be manipulated further to extract text, links, etc.
     """
     return search(query)
 
@@ -170,6 +181,25 @@ def is_capitalized(word):
     Return True or False according to whether `word` is capitalized.
     """
     return word == word.capitalize()
+
+def wolfram_answer(question):
+    """
+    Return Wolfram Alpha's answer to `question`.
+    """
+    waeo = wolfram.WolframAlphaEngine(config.wolfram_appid, wolfram_server)
+    query = waeo.CreateQuery(question)
+    result = waeo.PerformQuery(query)
+    waeqr = wolfram.WolframAlphaQueryResult(result)
+    xml_pods = [ElementTree.fromstring(x) for x in waeqr.XMLPods()] 
+    try:
+        primary_pods = [xml for xml in xml_pods 
+                        if ("primary" in x.attrib)
+                        and (x.attrib["primary"] == "true")]
+        primary_pod = primary_pods[0]
+        subpod = primary_pod.getchildren()[0]
+        return subpod.getchildren()[0].text
+    except IndexError:
+        return None
 
 if __name__ == "__main__":
     pretty_qa("Who ran the first four-minute mile?")
