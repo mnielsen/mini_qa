@@ -193,8 +193,8 @@ def wolfram_answer(question):
     xml_pods = [ElementTree.fromstring(x) for x in waeqr.XMLPods()] 
     try:
         primary_pods = [xml for xml in xml_pods 
-                        if ("primary" in x.attrib)
-                        and (x.attrib["primary"] == "true")]
+                        if ("primary" in xml.attrib)
+                        and (xml.attrib["primary"] == "true")]
         primary_pod = primary_pods[0]
         subpod = primary_pod.getchildren()[0]
         return subpod.getchildren()[0].text
