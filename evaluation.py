@@ -90,6 +90,8 @@ def evaluate_wolfram_qa(qa_pairs):
     for (j, qa_pair) in enumerate(qa_pairs):
         print "Processing question %s" % j
         wolfram_answer = mini_qa.wolfram_answer(qa_pair.question)
+        print "Wolfram answer: %s" % wolfram_answer
+        print "Answers: %s" % qa_pair.question
         if wolfram_answer in qa_pair.answers:
             perfect_answers += 1
     print "{} returned a perfect answer ({:2%})".format(
