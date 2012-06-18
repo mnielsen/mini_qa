@@ -197,7 +197,10 @@ def wolfram_answer(question):
                         and (xml.attrib["primary"] == "true")]
         primary_pod = primary_pods[0]
         subpod = primary_pod.getchildren()[0]
-        return subpod.getchildren()[0].text
+        answer = subpod.getchildren()[0].text
+        answer = re.sub("\|", "and", answer)
+        answer = " ".join(answer.split())
+        return answer
     except IndexError:
         return None
 
