@@ -40,16 +40,17 @@ wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 
 def pretty_qa(question, source="google", num=10):
     """
-    Wrapper for the `qa` function.  `pretty_qa` prints the `num`
-    highest scoring answers to `question`, with the scores in
-    parentheses.
+    Wrapper for the `qa` function.  `pretty_qa` uses `source` to
+    answer `question`.  For allowed values for `source`, see `qa`.
+    Some sources produce a ranked list of answers, in which case only
+    the top `num` are printed (with scores in parentheses).
     """
     print "\nQ: "+question
     if source=="google":
         for (j, (answer, score)) in enumerate(qa(question, source)[:num]):
-            print "%s. %s (%s)" % (j+1, " ".join(answer), score)
-    else: # assume source=="wolfram"
-        answer = qa(question, "wolfram")
+            print "%s. %s (%s)" % (j+1, answer, score)
+    else: # assume source=="wolfram" or source=="hybrid"
+        answer = qa(question, source)
         if answer:
             print answer
         else:
@@ -58,21 +59,23 @@ def pretty_qa(question, source="google", num=10):
 def qa(question, source="google"):
     """
     Return answers to `question` from `source`.  Allowed values for
-    `source` are "google" and "wolfram".  Note that the format of the
-    answers returned will depend on the value of `source`.  See
-    `google_qa` and `wolfram_qa` for details.
+    `source` are "google", "wolfram" and "hybrid".  Note that the
+    format of the answers returned will depend on the value of
+    `source`.  See `google_qa`, `wolfram_qa` and `hybrid_qa` for
+    details.
     """
     if source=="google":
         return google_qa(question)
-    else: # assume source=="wolfram"
+    elif source=="wolfram": 
         return wolfram_qa(question)
+    else: # assume source=="hybrid"
+        return hybrid_qa(question)
 
 def google_qa(question):
     """
     Return a list of tuples whose first entry is a candidate answer to
     `question`, and whose second entry is the score for that answer.
-    The tuples are ordered in decreasing order of score.  Note that
-    the answers themselves are tuples, with each entry being a word.
+    The tuples are ordered in decreasing order of score.  
     """
     answer_scores = defaultdict(int)
     for query in rewritten_queries(question):
@@ -81,9 +84,11 @@ def google_qa(question):
                 for ngram in candidate_answers(sentence, query.query):
                     answer_scores[ngram] += ngram_score(
                         ngram, query.score)
-    return list(sorted(answer_scores.iteritems(), 
-                       key=lambda x: x[1], 
-                       reverse=True))
+    ngrams_with_scores = sorted(answer_scores.iteritems(), 
+                                key=lambda x: x[1], 
+                                reverse=True)
+    return [(" ".join(ngram), score) 
+            for (ngram, score) in ngrams_with_scores]
 
 def rewritten_queries(question):
     """
@@ -223,11 +228,25 @@ def wolfram_qa(question):
         primary_pod = primary_pods[0]
         subpod = primary_pod.getchildren()[0]
         answer = subpod.getchildren()[0].text
-        answer = answer.split("\n")[0]
-        answer = re.sub("\|", "and", answer)
-        return " ".join(answer.split())
+        principle_line_of_answer = answer.split("\n")[0]
+        rewritten_answer = re.sub("\|", "and", principle_line_of_answer)
+        return " ".join(rewritten_answer.split())
     except IndexError:
         return None
+
+def hybrid_qa(question):
+    """
+    Return an answer to `question` using a combination of Google
+    search results and Wolfram Alpha.  The procedure is to query Alpha
+    and use its answer, falling back to the highest-ranked result
+    returned by `google_qa` if Alpha produces no results.  The answer
+    is returned in plain text.
+    """
+    wolfram_answer = wolfram_qa(question)
+    if wolfram_answer:
+        return wolfram_answer
+    else:
+        return google_qa(question)[0][0]
 
 if __name__ == "__main__":
     pretty_qa("Who ran the first four-minute mile?")
