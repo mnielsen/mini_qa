@@ -1,18 +1,9 @@
-#### mini_qa.py
-#
-# A toy question-answering system, which uses Google to attempt to
-# answer questions of the form "Who... ?"  An example is: "Who
-# discovered relativity?"
-#
-# The design is a simplified version of the AskMSR system developed by
-# researchers at Microsoft Research.  The original paper is:
-#
-# Brill, Lin, Banko, Dumais and Ng, "Data-Intensive Question
-# Answering" (2001).
-#
-# I've described background to this program here:
-#
-# http://www.michaelnielsen.org/ddi/how-to-answer-a-question-a-simple-system/
+"""
+mini_qa.py
+~~~~~~~~~~
+
+Toy question-answering program.
+"""
 
 #### Library imports
 

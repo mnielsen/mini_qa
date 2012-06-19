@@ -1,9 +1,12 @@
-#### evaluation.py
-#
-# Evaluates the performance of the mini_qa question-answering system.
+"""
+evaluation.py
+~~~~~~~~~~~~~
+
+Evaluates the performance of the `mini_qa.py` question-answering
+system.
+"""
 
 #### Library imports
-
 from __future__ import division
 import mini_qa
 

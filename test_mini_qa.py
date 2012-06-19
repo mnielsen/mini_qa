@@ -1,8 +1,9 @@
-#### test_mini_qa.py
-#
-# By Michael Nielsen, 2012
-#
-# Test suite for mini_qa.py
+"""
+test_mini_qa.py
+~~~~~~~~~~~~~~~
+
+Test suite for `mini_qa.py`.
+"""
 
 from mini_qa import *
 
