@@ -28,7 +28,7 @@ def evaluate(source="google"):
     Evaluate the question-answering system based on `source`.  Allowed
     values for `source` are explain in the doc string for mini_qa.qa.
     """
-    print "Evaluating the question-answering system based on %s" % % source
+    print "Evaluating the question-answering system based on %s" % source
     qa_pairs = load_qa_pairs()
     num_questions = len(qa_pairs)
     print "Generating candidate answers for %s questions" % num_questions
