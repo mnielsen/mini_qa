@@ -7,6 +7,7 @@
 import mini_qa
 
 # Standard library
+from __future__ import division
 import json
 
 class QAPair():
@@ -42,11 +43,11 @@ def evaluate_google_qa():
              okay_answers += 1
              rank_sum += cr[0]
     print "{} of {} had a correct answer in the top 20 ({:.2%})".format(
-        okay_answers, num_questions, float(okay_answers) / num_questions)
+        okay_answers, num_questions, okay_answers / num_questions)
     print "Average rank for answers in the top 20: {:.2f}".format(
-        float(rank_sum) / okay_answers)
+        rank_sum / okay_answers)
     print "{} returned a perfect answer ({:2%})".format(
-        perfect_answers, float(perfect_answers) / num_questions)
+        perfect_answers, perfect_answers / num_questions)
 
 def load_qa_pairs():
     """
@@ -96,7 +97,7 @@ def evaluate_wolfram_qa():
         if wolfram_answer in qa_pair.answers:
             perfect_answers += 1
     print "{} returned a perfect answer ({:2%})".format(
-        perfect_answers, float(perfect_answers) / num_questions)
+        perfect_answers, perfect_answers / num_questions)
 
 if __name__ == "__main__":
     main()

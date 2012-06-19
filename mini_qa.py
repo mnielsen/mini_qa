@@ -16,12 +16,11 @@
 
 #### Library imports
 
-import config
-
 # standard library
 from collections import defaultdict
 import json
 import re
+import sys
 from xml.etree import ElementTree
 
 # third-party libraries
@@ -30,9 +29,14 @@ import wolfram
 
 #### Config
 
-wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
+try:
+    import config
+except ImportError:
+    print "Failed to import config.  Enter configuration data"
+    print "into config.py.example, and rename it to config.py."
+    sys.exit()
 
- 
+wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 
 def pretty_qa(question, source="google", num=10):
     """
@@ -41,10 +45,29 @@ def pretty_qa(question, source="google", num=10):
     parentheses.
     """
     print "\nQ: "+question
-    for (j, (answer, score)) in enumerate(qa(question, source)[:num]):
-        print "%s. %s (%s)" % (j+1, " ".join(answer), score)
+    if source=="google":
+        for (j, (answer, score)) in enumerate(qa(question, source)[:num]):
+            print "%s. %s (%s)" % (j+1, " ".join(answer), score)
+    else: # assume source=="wolfram"
+        answer = qa(question, "wolfram")
+        if answer:
+            print answer
+        else:
+            print "No answer returned"
 
 def qa(question, source="google"):
+    """
+    Return answers to `question` from `source`.  Allowed values for
+    `source` are "google" and "wolfram".  Note that the format of the
+    answers returned will depend on the value of `source`.  See
+    `google_qa` and `wolfram_qa` for details.
+    """
+    if source=="google":
+        return google_qa(question)
+    else: # assume source=="wolfram"
+        return wolfram_qa(question)
+
+def google_qa(question):
     """
     Return a list of tuples whose first entry is a candidate answer to
     `question`, and whose second entry is the score for that answer.
@@ -53,11 +76,11 @@ def qa(question, source="google"):
     """
     answer_scores = defaultdict(int)
     for query in rewritten_queries(question):
-        for summary in get_summaries(query.query, source):
+        for summary in get_summaries(query.query):
             for sentence in sentences(summary):
                 for ngram in candidate_answers(sentence, query.query):
-                    answer_scores[ngram] += ngram_score(ngram, 
-                                                        query.score)
+                    answer_scores[ngram] += ngram_score(
+                        ngram, query.score)
     return list(sorted(answer_scores.iteritems(), 
                        key=lambda x: x[1], 
                        reverse=True))
@@ -182,11 +205,13 @@ def is_capitalized(word):
     """
     return word == word.capitalize()
 
-def wolfram_answer(question):
+def wolfram_qa(question):
     """
-    Return Wolfram Alpha's answer to `question`.
+    Return Wolfram Alpha's answer to `question`.  The answer is
+    returned in plain text.  If there is no answer it returns None.
     """
-    waeo = wolfram.WolframAlphaEngine(config.wolfram_appid, wolfram_server)
+    waeo = wolfram.WolframAlphaEngine(
+        config.wolfram_appid, wolfram_server)
     query = waeo.CreateQuery(question)
     result = waeo.PerformQuery(query)
     waeqr = wolfram.WolframAlphaQueryResult(result)
@@ -198,9 +223,9 @@ def wolfram_answer(question):
         primary_pod = primary_pods[0]
         subpod = primary_pod.getchildren()[0]
         answer = subpod.getchildren()[0].text
+        answer = answer.split("\n")[0]
         answer = re.sub("\|", "and", answer)
-        answer = " ".join(answer.split())
-        return answer
+        return " ".join(answer.split())
     except IndexError:
         return None
 
