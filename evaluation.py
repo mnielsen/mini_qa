@@ -39,6 +39,8 @@ def evaluate(source="google"):
     if source=="google":
         okay_answers = 0
         rank_sum = 0
+    if source=="wolfram" or source=="hybrid":
+        num_answers = 0
     for (j, qa_pair) in enumerate(qa_pairs):
         print "Processing question %s" % j
         if source=="google":
@@ -52,6 +54,8 @@ def evaluate(source="google"):
             answer = mini_qa.qa(qa_pair.question, source)
             if answer in qa_pair.answers:
                 perfect_answers += 1
+            if answer: # answer is not null
+                num_answer += 1
     print "{} returned a perfect answer ({:2%})".format(
         perfect_answers, perfect_answers / num_questions)
     if source=="google":
@@ -59,6 +63,9 @@ def evaluate(source="google"):
             okay_answers, num_questions, okay_answers / num_questions)
         print "Average rank for answers in the top 20: {:.2f}".format(
             rank_sum / okay_answers)
+    if source=="wolfram" or source=="hybrid":
+        print "{} of {} returned a non-null answer".format(
+            num_answers, num_questions)
 
 def load_qa_pairs():
     """
