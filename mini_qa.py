@@ -211,7 +211,10 @@ def wolfram_qa(question):
     query = waeo.CreateQuery(question)
     result = waeo.PerformQuery(query)
     waeqr = wolfram.WolframAlphaQueryResult(result)
-    xml_pods = [ElementTree.fromstring(x) for x in waeqr.XMLPods()] 
+    try:
+        xml_pods = [ElementTree.fromstring(x) for x in waeqr.XMLPods()] 
+    except UnicodeEncodeError:
+        xml_pods = []
     try:
         primary_pods = [xml for xml in xml_pods 
                         if ("primary" in xml.attrib)
