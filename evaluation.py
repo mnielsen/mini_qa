@@ -55,7 +55,7 @@ def evaluate(source="google"):
             if answer in qa_pair.answers:
                 perfect_answers += 1
             if answer: # answer is not null
-                num_answer += 1
+                num_answers += 1
     print "{} returned a perfect answer ({:2%})".format(
         perfect_answers, perfect_answers / num_questions)
     if source=="google":
