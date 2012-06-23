@@ -1,11 +1,16 @@
 """
-test_mini_qa.py
+test.py
 ~~~~~~~~~~~~~~~
 
-Test suite for `mini_qa.py`.
+Test suite.
 """
 
+from evaluation import *
 from mini_qa import *
+
+# Standard library
+import json
+import traceback
 
 failed_tests = 0
 
@@ -41,5 +46,24 @@ test("ngram_score(('Hello', 'there'), 7)", "21")
 test("is_capitalized('Hello')", "True")
 
 test("is_capitalized('hello')", "False")
+
+def test_qa_pairs():
+    """
+    Count the number of question-answer pairs in the qa_pairs.json
+    file.
+    """
+    f = open("qa_pairs.json")
+    qa_pairs = json.load(f)
+    f.close()
+    return len(qa_pairs)
+
+
+try:
+    print "\nTesting whether the qa_pairs.json file parses"
+    print "Number of evaluation question-answer pairs is %s" % test_qa_pairs()
+except:
+    print "Test failed"
+    traceback.print_exc()
+    failed_tests += 1
 
 finish_test()
