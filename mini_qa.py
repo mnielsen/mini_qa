@@ -37,12 +37,23 @@ wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 #### Create or retrieve an S3 bucket for the cache of Google search
 #### results
 s3conn = S3Connection(config.aws_access_key_id, config.aws_secret_access_key)
-cache_bucket_name = (config.aws_access_key_id).lower()+"-google-cache"
+google_cache_bucket_name = (config.aws_access_key_id).lower()+"-google-cache"
 try:
-    GOOGLE_CACHE = Key(s3conn.create_bucket(cache_bucket_name))
+    GOOGLE_CACHE = Key(s3conn.create_bucket(google_cache_bucket_name))
 except boto.exception.S3CreateError:
-    print "When creating an S3 bucket, a conflict occurred, and a bucket"
-    print "with the desired name already exists."
+    print "When creating an S3 bucket for Google cache results, a conflict "
+    print "occurred, and a bucket with the desired name already exists."
+    sys.exit()
+
+#### Create or retrieve an S3 bucket for the cache of Wolfram Alpha
+#### results
+wolfram_cache_bucket_name = (config.aws_access_key_id).lower()+"-wolfram-cache"
+try:
+    WOLFRAM_CACHE = Key(s3conn.create_bucket(wolfram_cache_bucket_name))
+except boto.exception.S3CreateError:
+    print "When creating an S3 bucket for Wolfram Alpha cache results, a "
+    print "conflict occurred, and a bucket with the desired name already"
+    print "exists."
     sys.exit()
 
 
@@ -227,6 +238,21 @@ def is_capitalized(word):
     return word == word.capitalize()
 
 def wolfram_qa(question):
+    """
+    Return Wolfram Alpha's answer to `question`.  Caches results to
+    not overuse the Wolfram API.  Note that this is mainly a wrapper
+    around `wolfram_qa_uncached`, and more information may be found in
+    that docstring.
+    """
+    WOLFRAM_CACHE.key = question
+    if WOLFRAM_CACHE.exists():
+        return pickle.loads(WOLFRAM_CACHE.get_contents_as_string())
+    else:
+        result = wolfram_qa_uncached(question)
+        WOLFRAM_CACHE.set_contents_from_string(pickle.dumps(result))
+        return result
+
+def wolfram_qa_uncached(question):
     """
     Return Wolfram Alpha's answer to `question`.  The answer is
     returned in plain text.  If there is no answer it returns None.
