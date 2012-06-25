@@ -18,6 +18,7 @@ from xml.etree import ElementTree
 # third-party libraries
 import boto
 from boto.s3.connection import S3Connection
+from boto.s3.key import Key
 from google import search
 import wolfram
 
@@ -39,7 +40,7 @@ s3conn = S3Connection(config.aws_access_key_id, config.aws_secret_access_key)
 cache_bucket_name = (config.aws_access_key_id).lower()+"-google-cache"
 print "Creating S3 bucket "+cache_bucket_name
 try:
-    GOOGLE_CACHE = s3conn.create_bucket(cache_bucket_name)
+    GOOGLE_CACHE = Key(s3conn.create_bucket(cache_bucket_name))
 except boto.exception.S3CreateError:
     print "A conflict occurred, and the S3 bucket already exists"
     sys.exit()
