@@ -153,9 +153,9 @@ def get_summaries(query, source="google"):
     """
     GOOGLE_CACHE.key = query
     if GOOGLE_CACHE.exists():
-        return cpickle.loads(GOOGLE_CACHE.get_contents_as_string())
+        return pickle.loads(GOOGLE_CACHE.get_contents_as_string())
     else:
-        results = cpickle.dumps(search(query))
+        results = pickle.dumps(search(query))
         GOOGLE_CACHE.set_contents_from_string(results)
         return results
 
