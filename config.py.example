@@ -4,3 +4,6 @@ wolfram_appid = "ZZZ"
 
 aws_access_key_id = "ZZZ"
 aws_secret_access_key = "ZZZ"
+
+GITHUB_USER_NAME = "ZZZ"
+GITHUB_PROJECT_NAME = "mini_qa" # You may wish to change

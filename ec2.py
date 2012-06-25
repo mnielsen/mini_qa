@@ -10,6 +10,7 @@
 
 # Standard library
 import os
+import subprocess
 import sys
 import time
 
@@ -85,6 +86,7 @@ def start():
     """
     instance = create_ec2_instance("m1.small")
     setup(instance)
+    subprocess.call(["fab", "first_deploy"])
     login(instance)
 
 def create_ec2_instance(instance_type):
