@@ -9,7 +9,7 @@ Toy question-answering program.
 
 # standard library
 from collections import defaultdict
-import cpickle
+import cPickle as pickle
 import json
 import os
 import re
