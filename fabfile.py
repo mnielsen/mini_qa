@@ -1,4 +1,17 @@
-from fabric.api import cd, local, run
+# Standard library
+import os
+
+# Third-party libraries
+from fabric.api import *
+from fabric.contrib.console import confirm
+
+# My libraries
+import ec2
+
+env.hosts = [ec2.get_running_instance().public_dns_name]
+env.user = 'ubuntu'
+env.key_filename = ["%s/%s.pem" % \
+                        (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])]
 
 GITHUB_USER_NAME = "mnielsen"
 GITHUB_PROJECT_NAME = "mini_qa"
