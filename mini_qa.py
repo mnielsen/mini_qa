@@ -20,9 +20,6 @@ from boto.s3.connection import S3Connection
 from google import search
 import wolfram
 
-S3CONN = S3Connection(
-    os.environ["AWS_ACCESS_KEY_ID"],
-    os.environ["AWS_SECRET_ACCESS_KEY"])
 
 #### Config
 
@@ -33,7 +30,22 @@ except ImportError:
     print "into config.py.example, and rename it to config.py."
     sys.exit()
 
+s3conn = S3Connection(
+    config.aws_access_key_id,
+    config.aws_secret_access_key)
+
 wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
+
+#### Create or retrieve an S3 bucket for the cache of Google search
+#### results
+cache_bucket_name = config.email+"_google_cache"
+print "Creating S3 bucket "+cache_bucket_name
+try:
+    GOOGLE_CACHE = s3conn.create_bucket(cache_bucket_name)
+except boto.exception.S3CreateError:
+    print "A conflict occurred, and the S3 bucket already exists"
+    sys.exit()
+
 
 def pretty_qa(question, source="google", num=10):
     """

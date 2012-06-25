@@ -120,8 +120,7 @@ def ssh(instances, cmd, background=False):
     Run ``cmd`` on the command line on ``instances``.  Runs in the
     background if ``background == True``.
     """
-    keypair = "%s/%s.pem" % (os.environ["AWS_HOME"],
-                             os.environ["AWS_KEYPAIR"])
+    keypair = "%s/%s.pem" % (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])
     append = {True: " &", False: ""}[background]
     for instance in instances:
         remote_cmd = "'nohup %s > foo.out 2> foo.err < /dev/null %s'" % (
