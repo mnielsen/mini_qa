@@ -126,7 +126,7 @@ def filter_result(link):
     return None
 
 # Returns a generator that yields URLs.
-def search(query, tld='com', lang='en', num=10, start=0, stop=None, pause=10.0):
+def search(query, tld='com', lang='en', num=10, start=0, stop=None, pause=30.0):
     """
     Search the given query string using Google.
 

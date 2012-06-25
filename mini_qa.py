@@ -150,6 +150,8 @@ def get_summaries(query, source="google"):
     if there are fewer than 10 summaries available.  Note that these
     summaries are returned as BeautifulSoup.BeautifulSoup objects, and
     may need to be manipulated further to extract text, links, etc.
+    Note also that we use GOOGLE_CACHE to cache old results, and will
+    preferentially retrieve from the cache, whenever possible.
     """
     GOOGLE_CACHE.key = query
     if GOOGLE_CACHE.exists():
