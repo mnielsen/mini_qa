@@ -36,7 +36,7 @@ wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 #### Create or retrieve an S3 bucket for the cache of Google search
 #### results
 s3conn = S3Connection(config.aws_access_key_id, config.aws_secret_access_key)
-cache_bucket_name = config.email+"_google_cache"
+cache_bucket_name = config.aws_access_key_id+"-google-cache"
 print "Creating S3 bucket "+cache_bucket_name
 try:
     GOOGLE_CACHE = s3conn.create_bucket(cache_bucket_name)
