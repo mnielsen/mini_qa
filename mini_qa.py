@@ -150,7 +150,16 @@ def get_summaries(query, source="google"):
     summaries are returned as BeautifulSoup.BeautifulSoup objects, and
     may need to be manipulated further to extract text, links, etc.
     """
-    return search(query)
+    GOOGLE_CACHE.key = query
+    try:
+        results = GOOGLE_CACHE.get_contents_as_string()
+        print "Getting results from cache"
+        return results
+    except S3ResponseError:
+        print "Results not in cache"
+        results = search(query)
+        GOOGLE_CACHE.set_contents_from_string(results)
+        return result
 
 def sentences(summary):
     """
