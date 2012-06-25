@@ -28,6 +28,20 @@ AMIS = {"m1.small" : "ami-e2af508b",
         "cc1.4xlarge" : "ami-1cad5275"
         }
 
+#### Check that the environment variables we need all exist
+def check_environment_variable_exists(var):
+    """
+    Check that the environment variable `var` exists, and if not print
+    an error message and exit."""
+    if var not in os.environ:
+        print "Need to set $%s environment variable" % var
+        sys.exit()
+
+check_environment_variable_exists("AWS_HOME")
+check_environment_variable_exists("AWS_KEYPAIR")
+check_environment_variable_exists("AWS_ACCESS_KEY_ID")
+check_environment_variable_exists("AWS_SECRET_ACCESS_KEY")
+
 def stop():
     """
     Terminate the first running EC2 instance we can find.  Should be

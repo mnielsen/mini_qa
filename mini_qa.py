@@ -11,7 +11,6 @@ Toy question-answering program.
 from collections import defaultdict
 import cPickle as pickle
 import json
-import os
 import re
 import sys
 from xml.etree import ElementTree
