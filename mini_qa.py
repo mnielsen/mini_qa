@@ -155,8 +155,8 @@ def get_summaries(query, source="google"):
     if GOOGLE_CACHE.exists():
         return pickle.loads(GOOGLE_CACHE.get_contents_as_string())
     else:
-        results = pickle.dumps(search(query))
-        GOOGLE_CACHE.set_contents_from_string(results)
+        results = search(query)
+        GOOGLE_CACHE.set_contents_from_string(pickle.dumps(results))
         return results
 
 def sentences(summary):
