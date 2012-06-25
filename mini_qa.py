@@ -151,11 +151,11 @@ def get_summaries(query, source="google"):
     may need to be manipulated further to extract text, links, etc.
     """
     GOOGLE_CACHE.key = query
-    try:
+    if GOOGLE_CACHE.exists()
         results = GOOGLE_CACHE.get_contents_as_string()
         print "Getting results from cache"
         return results
-    except boto.exception.S3ResponseError:
+    else:
         print "Results not in cache"
         results = search(query)
         GOOGLE_CACHE.set_contents_from_string(results)
