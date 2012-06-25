@@ -10,13 +10,19 @@ Toy question-answering program.
 # standard library
 from collections import defaultdict
 import json
+import os
 import re
 import sys
 from xml.etree import ElementTree
 
 # third-party libraries
+from boto.s3.connection import S3Connection
 from google import search
 import wolfram
+
+S3CONN = S3Connection(
+    os.environ["AWS_ACCESS_KEY_ID"],
+    os.environ["AWS_SECRET_ACCESS_KEY"])
 
 #### Config
 
