@@ -9,6 +9,7 @@ Toy question-answering program.
 
 # standard library
 from collections import defaultdict
+import cpickle
 import json
 import os
 import re
@@ -151,13 +152,10 @@ def get_summaries(query, source="google"):
     may need to be manipulated further to extract text, links, etc.
     """
     GOOGLE_CACHE.key = query
-    if GOOGLE_CACHE.exists()
-        results = GOOGLE_CACHE.get_contents_as_string()
-        print "Getting results from cache"
-        return results
+    if GOOGLE_CACHE.exists():
+        return cpickle.loads(GOOGLE_CACHE.get_contents_as_string())
     else:
-        print "Results not in cache"
-        results = search(query)
+        results = cpickle.dumps(search(query))
         GOOGLE_CACHE.set_contents_from_string(results)
         return results
 
