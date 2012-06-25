@@ -38,11 +38,11 @@ wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 #### results
 s3conn = S3Connection(config.aws_access_key_id, config.aws_secret_access_key)
 cache_bucket_name = (config.aws_access_key_id).lower()+"-google-cache"
-print "Creating S3 bucket "+cache_bucket_name
 try:
     GOOGLE_CACHE = Key(s3conn.create_bucket(cache_bucket_name))
 except boto.exception.S3CreateError:
-    print "A conflict occurred, and the S3 bucket already exists"
+    print "When creating an S3 bucket, a conflict occurred, and a bucket"
+    print "with the desired name already exists."
     sys.exit()
 
 
@@ -155,7 +155,7 @@ def get_summaries(query, source="google"):
         results = GOOGLE_CACHE.get_contents_as_string()
         print "Getting results from cache"
         return results
-    except S3ResponseError:
+    except boto.exception.S3ResponseError:
         print "Results not in cache"
         results = search(query)
         GOOGLE_CACHE.set_contents_from_string(results)
