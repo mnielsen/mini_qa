@@ -159,7 +159,7 @@ def get_summaries(query, source="google"):
         print "Results not in cache"
         results = search(query)
         GOOGLE_CACHE.set_contents_from_string(results)
-        return result
+        return results
 
 def sentences(summary):
     """
