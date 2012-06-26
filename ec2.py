@@ -6,7 +6,6 @@
 #
 # + Extend so it can be used with clusters, not just single machines
 # + Make it so clusters (or machines) are named.
-# + Consider integration with Puppet or Chef or Fabric
 
 # Standard library
 import os
@@ -85,7 +84,6 @@ def start():
     Create an EC2 instance, set it up, and login.
     """
     instance = create_ec2_instance("m1.small")
-    setup(instance)
     subprocess.call(["fab", "first_deploy"])
     login(instance)
 
@@ -109,13 +107,6 @@ def create_ec2_instance(instance_type):
     # Give the ssh daemon time to start
     time.sleep(120) 
     return instance
-
-def setup(instance):
-    """
-    Copy `setup.sh` to `instance` and run it.
-    """
-    scp([instance], "setup.sh")
-    ssh([instance], "bash setup.sh", False)
 
 def scp(instances, local_filename, remote_filename=False):
     """
@@ -151,5 +142,7 @@ if __name__ == "__main__":
         stop()
     elif arg == "login":
         login_cmd()
-    else: # start
+    elif arg == "start": 
         start()
+    else:
+        print "Did not recognize the command line argument"

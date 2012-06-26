@@ -32,11 +32,39 @@ def first_deploy():
     Sets up the initial git repository and other files, then does a
     standard deployment.
     """
+    setup_instance()
     run("git clone https://github.com/%s/%s.git" % (config.GITHUB_USER_NAME,
                                                     config.GITHUB_PROJECT_NAME))
     put("config.py", "/home/ubuntu/%s/config.py" % 
         config.GITHUB_PROJECT_NAME)
     deploy()
+
+def setup_instance():
+    """
+    Install all the required software on the remote machine, and configure
+    appropriately.
+    """
+    # Make sure we're up to date 
+    run("sudo apt-get update")
+    # git
+    run(sudo apt-get install -y git-core)
+    run(git config --global user.name "Michael Nielsen")
+    run(git config --global user.email "mn@michaelnielsen.org")
+    run(git config --global core.editor emacs)
+    run(git config --global alias.co checkout)
+    run(git config --global credential.helper cache)
+    # emacs
+    run(sudo apt-get install -y emacs23)
+    # Python libraries
+    # Make sure the Python path includes the $HOME directory
+    run(export PYTHONPATH=$HOME/)
+    # Python tools
+    run(sudo apt-get install -y python-dev)
+    run(sudo apt-get install -y python-setuptools)
+    run(sudo apt-get install -y ipython)
+    # Python libraries
+    run(sudo easy_install BeautifulSoup)
+    run(sudo easy_install boto)
 
 def deploy():
     """
