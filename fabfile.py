@@ -5,11 +5,9 @@ fabfile.py
 Fabric file to aid in deploying the `mini_qa` question-answering
 program. The main workflow is one of the following:
 
-1. `fab prepare_deploy`: run tests, and commit code
+1. `fab deploy`: run tests, push all code to server
 
-2. `fab deploy`: push all code to server
-
-3. `fab full_deploy`: run tests, commit code, and push all code to server
+2. `fab full_deploy`: run tests, and push all code to server
 
 """
 
@@ -40,18 +38,12 @@ def first_deploy():
         config.GITHUB_PROJECT_NAME)
     deploy()
 
-def prepare_deploy():
-    """
-    Run local tests and commits code.
-    """
-    local("python test.py")
-    local("git add -p && git commit")
-    local("git push origin")
-
 def deploy():
     """
-    Deploy all code to server, including code not in repository.
+    Run tests, deploy all code to server, including code not in
+    repository.
     """
+    local("python test.py")
     code_dir = "/home/ubuntu/"+config.GITHUB_PROJECT_NAME
     with cd(code_dir):
         run("git pull")
@@ -60,7 +52,7 @@ def deploy():
 
 def full_deploy():
     """
-    Run local tests, commit code, and deploy all code to server.
+    Run tests, commit code, and deploy all code to server.
     """
     prepare_deploy()
     deploy()
