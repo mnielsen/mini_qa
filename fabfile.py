@@ -2,13 +2,13 @@
 fabfile.py
 ~~~~~~~~~~
 
-Fabric file to aid in deploying the `mini_qa` question-answering
-program. The main workflow is one of the following:
+Fabric file to deploy the `mini_qa` question-answering program. The
+main workflow is one of:
 
-1. `fab deploy`: run tests, push all code to server
+1. `fab first_deploy`: set up the EC2 instance, run tests, push all
+   code to server
 
-2. `fab full_deploy`: run tests, and push all code to server
-
+2. `fab deploy`: run tests, and push all code to server
 """
 
 # Standard library
@@ -29,14 +29,11 @@ env.key_filename = ["%s/%s.pem" % \
 
 def first_deploy():
     """
-    Sets up the initial git repository and other files, then does a
+    Sets up the initial git repository and other files, then do a
     standard deployment.
     """
     setup_instance()
-    run("git clone https://github.com/%s/%s.git" % (config.GITHUB_USER_NAME,
-                                                    config.GITHUB_PROJECT_NAME))
-    put("config.py", "/home/ubuntu/%s/config.py" % 
-        config.GITHUB_PROJECT_NAME)
+    clone_repo()
     deploy()
 
 def setup_instance():
@@ -66,17 +63,25 @@ def setup_instance():
     run("sudo easy_install BeautifulSoup")
     run("sudo easy_install boto")
 
+def clone_repo():
+    """
+    When deploying for the first time, clone the desired GitHub
+    repository onto the EC2 instance.
+    """
+    run("git clone https://github.com/%s/%s.git" % \
+        (config.GITHUB_USER_NAME, config.GITHUB_PROJECT_NAME))
+
+
 def deploy():
     """
     Run tests, deploy all code to server, including code not in
     repository.
     """
     test()
+    transfer_special_files()
     code_dir = "/home/ubuntu/"+config.GITHUB_PROJECT_NAME
     with cd(code_dir):
         run("git pull")
-        put("config.py", "/home/ubuntu/%s/config.py" % 
-            config.GITHUB_PROJECT_NAME)
 
 def test():
     """
@@ -84,9 +89,9 @@ def test():
     """
     local('python test.py')
 
-def full_deploy():
+def transfer_special_files():
     """
-    Run tests, commit code, and deploy all code to server.
+    When deploying, transfer files that are not in the repository.
     """
-    prepare_deploy()
-    deploy()
+    put("config.py", "/home/ubuntu/%s/config.py" % 
+        config.GITHUB_PROJECT_NAME)
