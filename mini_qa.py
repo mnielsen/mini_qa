@@ -36,8 +36,8 @@ wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 
 #### Create or retrieve an S3 bucket for the cache of Google search
 #### results
-s3conn = S3Connection(config.aws_access_key_id, config.aws_secret_access_key)
-google_cache_bucket_name = (config.aws_access_key_id).lower()+"-google-cache"
+s3conn = S3Connection(config.AWS_ACCESS_KEY_ID, config.AWS_SECRET_ACCESS_KEY)
+google_cache_bucket_name = (config.AWS_ACCESS_KEY_ID).lower()+"-google-cache"
 try:
     GOOGLE_CACHE = Key(s3conn.create_bucket(google_cache_bucket_name))
 except boto.exception.S3CreateError:
@@ -47,7 +47,7 @@ except boto.exception.S3CreateError:
 
 #### Create or retrieve an S3 bucket for the cache of Wolfram Alpha
 #### results
-wolfram_cache_bucket_name = (config.aws_access_key_id).lower()+"-wolfram-cache"
+wolfram_cache_bucket_name = (config.AWS_ACCESS_KEY_ID).lower()+"-wolfram-cache"
 try:
     WOLFRAM_CACHE = Key(s3conn.create_bucket(wolfram_cache_bucket_name))
 except boto.exception.S3CreateError:
@@ -258,7 +258,7 @@ def wolfram_qa_uncached(question):
     returned in plain text.  If there is no answer it returns None.
     """
     waeo = wolfram.WolframAlphaEngine(
-        config.wolfram_appid, wolfram_server)
+        config.WOLFRAM_APPID, wolfram_server)
     query = waeo.CreateQuery(question)
     result = waeo.PerformQuery(query)
     waeqr = wolfram.WolframAlphaQueryResult(result)
