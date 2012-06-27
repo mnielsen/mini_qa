@@ -34,6 +34,9 @@ except ImportError:
 
 wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 
+#### Parameters
+CAPITALIZATION_FACTOR = 2.1
+
 #### Create or retrieve an S3 bucket for the cache of Google search
 #### results
 s3conn = S3Connection(config.AWS_ACCESS_KEY_ID, config.AWS_SECRET_ACCESS_KEY)
@@ -223,13 +226,13 @@ def ngrams(words, n=1):
 def ngram_score(ngram, score):
     """
     Return the score associated to `ngram`.  The base score is
-    `score`, but it's modified by a factor which is 3 to the power of
-    the number of capitalized words.  This biases answers toward
-    proper nouns.
+    `score`, but it's modified by a factor which is
+    `CAPITALIZATION_FACTOR` to the power of the number of capitalized
+    words.  This biases answers toward proper nouns.
     """
     num_capitalized_words = sum(
         1 for word in ngram if is_capitalized(word)) 
-    return score * (3**num_capitalized_words)
+    return score * (CAPITALIZATION_FACTOR**num_capitalized_words)
 
 def is_capitalized(word):
     """
