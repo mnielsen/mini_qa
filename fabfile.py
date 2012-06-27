@@ -82,10 +82,7 @@ def test():
     """
     Run the tests.
     """
-    with settings(warn_only=True):
-        result = local('python test.py', capture=True)
-    if result.failed and not confirm("Tests failed.  Continue?"):
-        abort("Aborting.")
+    local('python test.py')
 
 def full_deploy():
     """
