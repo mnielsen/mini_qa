@@ -71,12 +71,21 @@ def deploy():
     Run tests, deploy all code to server, including code not in
     repository.
     """
-    local("python test.py")
+    test()
     code_dir = "/home/ubuntu/"+config.GITHUB_PROJECT_NAME
     with cd(code_dir):
         run("git pull")
         put("config.py", "/home/ubuntu/%s/config.py" % 
             config.GITHUB_PROJECT_NAME)
+
+def test():
+    """
+    Run the tests.
+    """
+    with settings(warn_only=True):
+        result = local('python test.py', capture=True)
+    if result.failed and not confirm("Tests failed.  Continue?"):
+        abort("Aborting.")
 
 def full_deploy():
     """
