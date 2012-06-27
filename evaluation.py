@@ -47,7 +47,6 @@ def evaluate(source="google"):
             cr = correct_results(answers(qa_pair.question), qa_pair.answers)
             if 0 in cr:
                 perfect_answers += 1
-                print "Got it right: "+qa_pair.question
             if len(cr) > 0:
                 okay_answers += 1
                 rank_sum += cr[0]
@@ -55,7 +54,6 @@ def evaluate(source="google"):
             answer = mini_qa.qa(qa_pair.question, source)
             if answer in qa_pair.answers:
                 perfect_answers += 1
-                print "Got it right: "+qa_pair.question
             if answer: # answer is not null
                 num_answers += 1
     print "{} returned a perfect answer ({:2%})".format(
