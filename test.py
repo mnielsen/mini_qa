@@ -15,6 +15,7 @@ import traceback
 failed_tests = 0
 
 def test(code, result=None):
+    global failed_tests
     print "\nTesting: "+code
     if result: print "Expecting: "+result
     print "Output: %s" % eval(code)
@@ -41,7 +42,11 @@ test("candidate_answers('The quick brown fox jumped over the lazy grey dogs', ('
 test("ngrams(['the', 'quick', 'brown'], 2)", 
      "[('the', 'quick'), ('quick', 'brown')]")
 
-test("ngram_score(('Hello', 'there'), 7)", "21")
+# In the following, only evaluate to 1 decimal place.  Using floats
+# the test may not pass, because of the ambiguities of floating point
+# arithmetic
+test("int(ngram_score(('Hello', 'there'), 7)*10)/10.0", 
+     "%s" % (int(7 *CAPITALIZATION_FACTOR*10)/10.0))
 
 test("is_capitalized('Hello')", "True")
 
