@@ -47,24 +47,24 @@ def setup_instance():
     # Make sure we're up to date 
     run("sudo apt-get update")
     # git
-    run(sudo apt-get install -y git-core)
-    run(git config --global user.name "Michael Nielsen")
-    run(git config --global user.email "mn@michaelnielsen.org")
-    run(git config --global core.editor emacs)
-    run(git config --global alias.co checkout)
-    run(git config --global credential.helper cache)
+    run("sudo apt-get install -y git-core")
+    run("git config --global user.name 'Michael Nielsen'")
+    run("git config --global user.email 'mn@michaelnielsen.org'")
+    run("git config --global core.editor emacs")
+    run("git config --global alias.co checkout")
+    run("git config --global credential.helper cache")
     # emacs
-    run(sudo apt-get install -y emacs23)
+    run("sudo apt-get install -y emacs23")
     # Python libraries
     # Make sure the Python path includes the $HOME directory
-    run(export PYTHONPATH=$HOME/)
+    run("export PYTHONPATH=$HOME/")
     # Python tools
-    run(sudo apt-get install -y python-dev)
-    run(sudo apt-get install -y python-setuptools)
-    run(sudo apt-get install -y ipython)
+    run("sudo apt-get install -y python-dev")
+    run("sudo apt-get install -y python-setuptools")
+    run("sudo apt-get install -y ipython")
     # Python libraries
-    run(sudo easy_install BeautifulSoup)
-    run(sudo easy_install boto)
+    run("sudo easy_install BeautifulSoup")
+    run("sudo easy_install boto")
 
 def deploy():
     """
