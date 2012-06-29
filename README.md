@@ -1,18 +1,20 @@
 # About `mini_qa`
 
-`mini_qa` is a toy question-answering program.  It uses Google to
-attempt to answer questions of the form "Who... ?"
+`mini_qa` is a toy question-answering program.  It uses Google and
+Wolfram Alpha to attempt to answer questions of the form "Who... ?"
 
 An example question is: "Who discovered relativity?"
 
-The design is a toy version of the AskMSR system developed by
-researchers at Microsoft Research.  The original paper is:
+The design is inspired by the AskMSR system developed by researchers
+at Microsoft Research.  The original paper is:
 
 Brill, Lin, Banko, Dumais and Ng, "Data-Intensive Question
 Answering" (2001).
 
 I've described background to this program
-[here](http://www.michaelnielsen.org/ddi/how-to-answer-a-question-a-simple-system/).
+[here](http://www.michaelnielsen.org/ddi/how-to-answer-a-question-a-simple-system/)
+and
+[here](http://www.michaelnielsen.org/ddi/how-to-improve-our-question-answering-system).
 
 # Note on contributions and pull requests
 
@@ -33,8 +35,8 @@ looking for feedback on that code.
 
 MIT License
 
-Except the file `google.py` all files in this repository are copyright
-(c) 2012 Michael Nielsen
+Except the files `google.py` and `wolfram.py` all files in this
+repository are copyright (c) 2012 Michael Nielsen
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation files

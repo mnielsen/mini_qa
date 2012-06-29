@@ -35,7 +35,7 @@ except ImportError:
 wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 
 #### Parameters
-CAPITALIZATION_FACTOR = 2.1
+CAPITALIZATION_FACTOR = 2.2
 
 #### Create or retrieve an S3 bucket for the cache of Google search
 #### results
