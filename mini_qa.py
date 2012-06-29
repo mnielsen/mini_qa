@@ -34,8 +34,11 @@ except ImportError:
 
 wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
 
-#### Parameters
+#### Parameters used to score results returned from the Google-based
+#### system
 CAPITALIZATION_FACTOR = 2.2
+QUOTED_QUERY_SCORE = 5
+UNQUOTED_QUERY_SCORE = 2
 
 #### Create or retrieve an S3 bucket for the cache of Google search
 #### results
@@ -122,14 +125,15 @@ def rewritten_queries(question):
     tq = tokenize(question)
     verb = tq[1] # the simplest assumption, something to improve
     rewrites.append(
-        RewrittenQuery("\"%s %s\"" % (verb, " ".join(tq[2:])), 5))
+        RewrittenQuery("\"%s %s\"" % (verb, " ".join(tq[2:])), 
+                       QUOTED_QUERY_SCORE))
     for j in range(2, len(tq)):
         rewrites.append(
             RewrittenQuery(
                 "\"%s %s %s\"" % (
                     " ".join(tq[2:j+1]), verb, " ".join(tq[j+1:])),
-                5))
-    rewrites.append(RewrittenQuery(" ".join(tq[2:]), 2))
+                QUOTED_QUERY_SCORE))
+        rewrites.append(RewrittenQuery(" ".join(tq[2:]), UNQUOTED_QUERY_SCORE))
     return rewrites
 
 def tokenize(question):
