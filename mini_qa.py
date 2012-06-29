@@ -133,7 +133,7 @@ def rewritten_queries(question):
                 "\"%s %s %s\"" % (
                     " ".join(tq[2:j+1]), verb, " ".join(tq[j+1:])),
                 QUOTED_QUERY_SCORE))
-        rewrites.append(RewrittenQuery(" ".join(tq[2:]), UNQUOTED_QUERY_SCORE))
+    rewrites.append(RewrittenQuery(" ".join(tq[2:]), UNQUOTED_QUERY_SCORE))
     return rewrites
 
 def tokenize(question):
