@@ -8,6 +8,7 @@ setup(
     author='Michael Nielsen',
     author_email='mn@michaelnielsen.org',
     description='A toy question-answering system',
-    platforms='any'
+    platforms='any',
+    packages=['boto']
     ]
 )
