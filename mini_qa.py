@@ -9,14 +9,19 @@ Toy question-answering program.
 
 # standard library
 from collections import defaultdict
+import cPickle as pickle
 import json
 import re
 import sys
 from xml.etree import ElementTree
 
 # third-party libraries
+import boto
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
 from google import search
 import wolfram
+
 
 #### Config
 
@@ -28,6 +33,35 @@ except ImportError:
     sys.exit()
 
 wolfram_server = 'http://api.wolframalpha.com/v1/query.jsp'
+
+#### Parameters used to score results returned from the Google-based
+#### system
+CAPITALIZATION_FACTOR = 2.2
+QUOTED_QUERY_SCORE = 5
+UNQUOTED_QUERY_SCORE = 2
+
+#### Create or retrieve an S3 bucket for the cache of Google search
+#### results
+s3conn = S3Connection(config.AWS_ACCESS_KEY_ID, config.AWS_SECRET_ACCESS_KEY)
+google_cache_bucket_name = (config.AWS_ACCESS_KEY_ID).lower()+"-google-cache"
+try:
+    GOOGLE_CACHE = Key(s3conn.create_bucket(google_cache_bucket_name))
+except boto.exception.S3CreateError:
+    print "When creating an S3 bucket for Google cache results, a conflict "
+    print "occurred, and a bucket with the desired name already exists."
+    sys.exit()
+
+#### Create or retrieve an S3 bucket for the cache of Wolfram Alpha
+#### results
+wolfram_cache_bucket_name = (config.AWS_ACCESS_KEY_ID).lower()+"-wolfram-cache"
+try:
+    WOLFRAM_CACHE = Key(s3conn.create_bucket(wolfram_cache_bucket_name))
+except boto.exception.S3CreateError:
+    print "When creating an S3 bucket for Wolfram Alpha cache results, a "
+    print "conflict occurred, and a bucket with the desired name already"
+    print "exists."
+    sys.exit()
+
 
 def pretty_qa(question, source="google", num=10):
     """
@@ -91,14 +125,15 @@ def rewritten_queries(question):
     tq = tokenize(question)
     verb = tq[1] # the simplest assumption, something to improve
     rewrites.append(
-        RewrittenQuery("\"%s %s\"" % (verb, " ".join(tq[2:])), 5))
+        RewrittenQuery("\"%s %s\"" % (verb, " ".join(tq[2:])), 
+                       QUOTED_QUERY_SCORE))
     for j in range(2, len(tq)):
         rewrites.append(
             RewrittenQuery(
                 "\"%s %s %s\"" % (
                     " ".join(tq[2:j+1]), verb, " ".join(tq[j+1:])),
-                5))
-    rewrites.append(RewrittenQuery(" ".join(tq[2:]), 2))
+                QUOTED_QUERY_SCORE))
+    rewrites.append(RewrittenQuery(" ".join(tq[2:]), UNQUOTED_QUERY_SCORE))
     return rewrites
 
 def tokenize(question):
@@ -132,8 +167,16 @@ def get_summaries(query, source="google"):
     if there are fewer than 10 summaries available.  Note that these
     summaries are returned as BeautifulSoup.BeautifulSoup objects, and
     may need to be manipulated further to extract text, links, etc.
+    Note also that we use GOOGLE_CACHE to cache old results, and will
+    preferentially retrieve from the cache, whenever possible.
     """
-    return search(query)
+    GOOGLE_CACHE.key = query
+    if GOOGLE_CACHE.exists():
+        return pickle.loads(GOOGLE_CACHE.get_contents_as_string())
+    else:
+        results = search(query)
+        GOOGLE_CACHE.set_contents_from_string(pickle.dumps(results))
+        return results
 
 def sentences(summary):
     """
@@ -187,13 +230,13 @@ def ngrams(words, n=1):
 def ngram_score(ngram, score):
     """
     Return the score associated to `ngram`.  The base score is
-    `score`, but it's modified by a factor which is 3 to the power of
-    the number of capitalized words.  This biases answers toward
-    proper nouns.
+    `score`, but it's modified by a factor which is
+    `CAPITALIZATION_FACTOR` to the power of the number of capitalized
+    words.  This biases answers toward proper nouns.
     """
     num_capitalized_words = sum(
         1 for word in ngram if is_capitalized(word)) 
-    return score * (3**num_capitalized_words)
+    return score * (CAPITALIZATION_FACTOR**num_capitalized_words)
 
 def is_capitalized(word):
     """
@@ -203,11 +246,26 @@ def is_capitalized(word):
 
 def wolfram_qa(question):
     """
+    Return Wolfram Alpha's answer to `question`.  Caches results to
+    not overuse the Wolfram API.  Note that this is mainly a wrapper
+    around `wolfram_qa_uncached`, and more information may be found in
+    that docstring.
+    """
+    WOLFRAM_CACHE.key = question
+    if WOLFRAM_CACHE.exists():
+        return pickle.loads(WOLFRAM_CACHE.get_contents_as_string())
+    else:
+        result = wolfram_qa_uncached(question)
+        WOLFRAM_CACHE.set_contents_from_string(pickle.dumps(result))
+        return result
+
+def wolfram_qa_uncached(question):
+    """
     Return Wolfram Alpha's answer to `question`.  The answer is
     returned in plain text.  If there is no answer it returns None.
     """
     waeo = wolfram.WolframAlphaEngine(
-        config.wolfram_appid, wolfram_server)
+        config.WOLFRAM_APPID, wolfram_server)
     query = waeo.CreateQuery(question)
     result = waeo.PerformQuery(query)
     waeqr = wolfram.WolframAlphaQueryResult(result)

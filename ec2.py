@@ -6,10 +6,10 @@
 #
 # + Extend so it can be used with clusters, not just single machines
 # + Make it so clusters (or machines) are named.
-# + Consider integration with Puppet or Chef or Fabric
 
 # Standard library
 import os
+import subprocess
 import sys
 import time
 
@@ -27,6 +27,20 @@ AMIS = {"m1.small" : "ami-e2af508b",
         "c1.xlarge" : "ami-68ad5201",
         "cc1.4xlarge" : "ami-1cad5275"
         }
+
+#### Check that the environment variables we need all exist
+def check_environment_variable_exists(var):
+    """
+    Check that the environment variable `var` exists, and if not print
+    an error message and exit."""
+    if var not in os.environ:
+        print "Need to set $%s environment variable" % var
+        sys.exit()
+
+check_environment_variable_exists("AWS_HOME")
+check_environment_variable_exists("AWS_KEYPAIR")
+check_environment_variable_exists("AWS_ACCESS_KEY_ID")
+check_environment_variable_exists("AWS_SECRET_ACCESS_KEY")
 
 def stop():
     """
@@ -70,7 +84,7 @@ def start():
     Create an EC2 instance, set it up, and login.
     """
     instance = create_ec2_instance("m1.small")
-    setup(instance)
+    subprocess.call(["fab", "first_deploy"])
     login(instance)
 
 def create_ec2_instance(instance_type):
@@ -94,13 +108,6 @@ def create_ec2_instance(instance_type):
     time.sleep(120) 
     return instance
 
-def setup(instance):
-    """
-    Copy `setup.sh` to `instance` and run it.
-    """
-    scp([instance], "setup.sh")
-    ssh([instance], "bash setup.sh", False)
-
 def scp(instances, local_filename, remote_filename=False):
     """
     scp ``local_filename`` to ``remote_filename`` on ``instances``.
@@ -120,8 +127,7 @@ def ssh(instances, cmd, background=False):
     Run ``cmd`` on the command line on ``instances``.  Runs in the
     background if ``background == True``.
     """
-    keypair = "%s/%s.pem" % (os.environ["AWS_HOME"],
-                             os.environ["AWS_KEYPAIR"])
+    keypair = "%s/%s.pem" % (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])
     append = {True: " &", False: ""}[background]
     for instance in instances:
         remote_cmd = "'nohup %s > foo.out 2> foo.err < /dev/null %s'" % (
@@ -136,5 +142,7 @@ if __name__ == "__main__":
         stop()
     elif arg == "login":
         login_cmd()
-    else: # start
+    elif arg == "start": 
         start()
+    else:
+        print "Did not recognize the command line argument"
