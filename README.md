@@ -14,16 +14,20 @@ Answering" (2001).
 I've described background to this program
 [here](http://www.michaelnielsen.org/ddi/how-to-answer-a-question-a-simple-system/)
 and
-[here](http://www.michaelnielsen.org/ddi/how-to-improve-our-question-answering-system).
+[here](http://www.michaelnielsen.org/ddi/using-evaluation-to-improve-our-question-answering-system/).
+
+# Installation and useage
+
+To be added.
 
 # Note on contributions and pull requests
 
 Bug fixes are welcome.
 
-This program is a toy, and I don't intend to add features, so won't
-accept pull requests that add features.  But feel free to fork and add
-features if you like --- the beauty of AskMSR is that it's an easy
-system to extend.
+This program is a toy, and I'm using it purely for illustrative
+purposes on my blog, so I don't plan to accept pull requests that add
+features.  But feel free to fork and add features --- the beauty of
+AskMSR is that it's an easy system to extend. 
 
 If you have comments or suggestions about the style of the main
 program (`mini_qa.py`), I'd like to hear them.  Leave them on the
