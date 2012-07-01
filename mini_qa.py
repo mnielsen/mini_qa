@@ -144,6 +144,7 @@ def tokenize(question):
     """
     return [re.sub(r"\W", "", x) for x in question.lower().split()]
 
+
 class RewrittenQuery():
     """
     Given a question we rewrite it as a query to send to Google.

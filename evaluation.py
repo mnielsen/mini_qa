@@ -13,6 +13,7 @@ import mini_qa
 # Standard library
 import json
 
+
 class QAPair():
     """
     Stores a question and a list of acceptable answers.
@@ -20,6 +21,7 @@ class QAPair():
     def __init__(self, question, answers):
         self.question = question
         self.answers = answers
+
 
 def main():
     evaluate("google")
