@@ -28,7 +28,7 @@ import wolfram
 try:
     import config
 except ImportError:
-    print ("Failed to import config.  Enter configuration data into "
+    print ("Failed to import config.  Enter configuration data into\n"
            "config.py.example, and rename it to config.py.")
     sys.exit()
 
@@ -47,7 +47,7 @@ google_cache_bucket_name = (config.AWS_ACCESS_KEY_ID).lower()+"-google-cache"
 try:
     GOOGLE_CACHE = Key(s3conn.create_bucket(google_cache_bucket_name))
 except boto.exception.S3CreateError:
-    print ("When creating an S3 bucket for Google cache results, a conflict "
+    print ("When creating an S3 bucket for Google cache results, a conflict\n"
            "occurred, and a bucket with the desired name already exists.")
     sys.exit()
 
@@ -57,8 +57,8 @@ wolfram_cache_bucket_name = (config.AWS_ACCESS_KEY_ID).lower()+"-wolfram-cache"
 try:
     WOLFRAM_CACHE = Key(s3conn.create_bucket(wolfram_cache_bucket_name))
 except boto.exception.S3CreateError:
-    print ("When creating an S3 bucket for Wolfram Alpha cache results, a "
-           "conflict occurred, and a bucket with the desired name already"
+    print ("When creating an S3 bucket for Wolfram Alpha cache results, a\n"
+           "conflict occurred, and a bucket with the desired name already\n"
            "exists.")
     sys.exit()
 
