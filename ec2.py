@@ -1,11 +1,8 @@
 #### ec2.py
 #
-# Creates a small instance at EC2, and sshes you into it.
+# Simple EC2 cluster management with Python.
 #
-#### Possible additions
-#
-# + Extend so it can be used with clusters, not just single machines
-# + Make it so clusters (or machines) are named.
+# Mostly a convenience wrapper around the boto library.
 
 # Standard library
 import os
@@ -29,18 +26,22 @@ AMIS = {"m1.small" : "ami-e2af508b",
         }
 
 #### Check that the environment variables we need all exist
-def check_environment_variable_exists(var):
+def check_environment_variables_exist(*args):
     """
-    Check that the environment variable `var` exists, and if not print
-    an error message and exit."""
-    if var not in os.environ:
-        print "Need to set $%s environment variable" % var
+    Check that the environment variables in `*args` all exist.  If any
+    do not, print an error message and exit.
+    """
+    vars_exist = True
+    for var in *args:
+        if var not in os.environ:
+            print "Need to set $%s environment variable" % var
+            vars_exist = False
+    if not vars_exist:
+        print "Exiting"
         sys.exit()
 
-check_environment_variable_exists("AWS_HOME")
-check_environment_variable_exists("AWS_KEYPAIR")
-check_environment_variable_exists("AWS_ACCESS_KEY_ID")
-check_environment_variable_exists("AWS_SECRET_ACCESS_KEY")
+check_environment_variables_exist("AWS_HOME", "AWS_KEYPAIR",
+                                  "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY")
 
 def stop():
     """
