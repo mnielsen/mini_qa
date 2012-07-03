@@ -3,6 +3,61 @@
 # Simple EC2 cluster management with Python.
 #
 # Mostly a convenience wrapper around the boto library.
+#
+#### Possible future extensions
+#
+#
+# Useage from the command line:
+#
+#    python ec2.py create CLUSTER_NAME n type 
+#
+#    Create a cluster with name `CLUSTER_NAME`, containing `n` machines
+#    of type `type`.
+#
+#
+#    python ec2.py show_all
+#
+#    Shows names of all clusters currently running, and some basic data.
+#
+#
+#    python ec2.py show CLUSTER_NAME
+#
+#    Show details of named cluster, including the type of machines,
+#    indices for all machines, DNS, and instance numbers.
+#
+#
+#    python ec2.py add CLUSTER_NAME n
+#
+#    Add n extra machines to CLUSTER_NAME.
+#
+#
+#    python ec2.py kill CLUSTER_NAME [n1 n2 n3...]
+#
+#    Indices of the machines to kill in CLUSTER_NAME.
+#
+#
+#    python ec2.py shutdown CLUSTER_NAME
+#
+#    Shutdown CLUSTER_NAME entirely
+#
+#
+#    python ec2.py shutdown_all
+#
+#    Shutdown all clusters.
+#
+#
+#    python ec2.py ssh CLUSTER_NAME [n]
+#
+#    ssh in to CLUSTER_NAME, to the instance with optional index n 
+#    (default 0).
+#
+#
+# Also exports an additional useful method:
+#
+#    ec2.boto_object(CLUSTER_NAME, index=0)
+#
+#    Returns the boto object for the instance represented by CLUSTER_NAME
+#    and index.
 
 # Standard library
 import os
