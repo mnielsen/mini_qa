@@ -3,7 +3,7 @@ ec2.py
 ~~~~~~
 Simple EC2 cluster management with Python.
 
-Mostly a convenience wrapper around the boto library.
+Mostly a convenience wrapper around the boto library.  
 
 Usage from the command line:
 
@@ -15,29 +15,30 @@ Usage from the command line:
 
     python ec2.py show_all
 
-    Shows names of all clusters currently running, and some basic data.
+    Shows names of all clusters currently running, and some basic data
+    about each cluster.
 
 
-     python ec2.py show CLUSTER_NAME
+    python ec2.py show CLUSTER_NAME
 
-     Show details of named cluster, including the type of machines,
+    Show details of named cluster, including the type of machines,
     indices for all machines, DNS, and instance numbers.
 
 
-     python ec2.py shutdown CLUSTER_NAME
+    python ec2.py shutdown CLUSTER_NAME
 
-     Shutdown CLUSTER_NAME entirely
-
-
-     python ec2.py shutdown_all
-
-     Shutdown all clusters.
+    Shutdown CLUSTER_NAME entirely
 
 
-     python ec2.py ssh CLUSTER_NAME [n]
+    python ec2.py shutdown_all
 
-     ssh in to CLUSTER_NAME, to the instance with optional index n 
-     (default 0).
+    Shutdown all clusters.
+
+
+    python ec2.py login CLUSTER_NAME [n]
+
+    Login to CLUSTER_NAME, to the instance with optional index n 
+    (default 0).
 
 
 Future expansion
@@ -45,21 +46,21 @@ Future expansion
 
 Future usage:
 
-     python ec2.py add CLUSTER_NAME n
+    python ec2.py add CLUSTER_NAME n
 
-     Add n extra machines to CLUSTER_NAME.
+    Add n extra machines to CLUSTER_NAME.
 
 
-     python ec2.py kill CLUSTER_NAME [n1 n2 n3...]
+    python ec2.py kill CLUSTER_NAME [n1 n2 n3...]
 
-     Indices of the machines to kill in CLUSTER_NAME.
+    Indices of the machines to kill in CLUSTER_NAME.
 
 To export an additiona method:
 
-     ec2.boto_object(CLUSTER_NAME, index=0)
+    ec2.boto_object(CLUSTER_NAME, index=0)
 
-     Returns the boto object for the instance represented by CLUSTER_NAME
-     and index.
+    Returns the boto object for the instance represented by CLUSTER_NAME
+    and index.
 """
 
 # Standard library
@@ -225,14 +226,19 @@ def login(cluster_name, instance_index):
     keypair = "%s/%s.pem" % (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])
     os.system("ssh -i %s ubuntu@%s" % (keypair, instance.public_dns_name))
 
-def start():
+def ssh(instances, cmd, background=False):
     """
-    Create an EC2 instance, set it up, and login.
+    Run ``cmd`` on the command line on ``instances``.  Runs in the
+    background if ``background == True``.
     """
-    instance = create_ec2_instance("m1.small")
-    subprocess.call(["fab", "first_deploy"])
-    login(instance)
-
+    keypair = "%s/%s.pem" % (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])
+    append = {True: " &", False: ""}[background]
+    for instance in instances:
+        remote_cmd = "'nohup %s > foo.out 2> foo.err < /dev/null %s'" % (
+            cmd, append)
+        os.system(
+            "ssh -o BatchMode=yes -i %s ubuntu@%s %s" % (
+                keypair, instance.public_dns_name, remote_cmd))
 
 def scp(instances, local_filename, remote_filename=False):
     """
@@ -248,19 +254,13 @@ def scp(instances, local_filename, remote_filename=False):
                 keypair, local_filename, 
                 instance.public_dns_name, remote_filename))
 
-def ssh(instances, cmd, background=False):
+def start():
     """
-    Run ``cmd`` on the command line on ``instances``.  Runs in the
-    background if ``background == True``.
+    Create an EC2 instance, set it up, and login.
     """
-    keypair = "%s/%s.pem" % (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])
-    append = {True: " &", False: ""}[background]
-    for instance in instances:
-        remote_cmd = "'nohup %s > foo.out 2> foo.err < /dev/null %s'" % (
-            cmd, append)
-        os.system(
-            "ssh -o BatchMode=yes -i %s ubuntu@%s %s" % (
-                keypair, instance.public_dns_name, remote_cmd))
+    instance = create_ec2_instance("m1.small")
+    subprocess.call(["fab", "first_deploy"])
+    login(instance)
 
 #### External interface
 
