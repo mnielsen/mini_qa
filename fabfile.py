@@ -22,7 +22,7 @@ from fabric.contrib.console import confirm
 import config
 import ec2
 
-env.hosts = [ec2.get_running_instance().public_dns_name]
+env.hosts = ec2.public_dns_names("mini_qa")
 env.user = 'ubuntu'
 env.key_filename = ["%s/%s.pem" % \
                         (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])]

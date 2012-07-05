@@ -126,6 +126,15 @@ clusters = shelve.open("ec2.shelf")
 ec2_conn = EC2Connection(os.environ["AWS_ACCESS_KEY_ID"], 
                          os.environ["AWS_SECRET_ACCESS_KEY"])
 
+def public_dns_names(cluster_name):
+    if cluster_name not in clusters:
+        print ("Cluster name %s not recognized.  Exiting ec2.ec2_hosts()." %
+               cluster_name)
+        sys.exit()
+    else:
+        cluster = clusters[cluster_name]
+        return [instance["public_dns_name"] for instance in cluster]
+
 def create(cluster_name, n, instance_type):
     """
     Create an EC2 cluster with name `cluster_name`, and `n` instances
@@ -179,13 +188,10 @@ def shutdown(cluster_name):
         print "No cluster with the name %s exists.  Exiting." % cluster_name
         sys.exit()
     print "Shutting down cluster %s." % cluster_name
-    cluster = clusters[cluster_name]
-    cluster_public_dns_names = [instance["public_dns_name"]
-                                for instance in cluster]
     all_running_instances = get_running_instances()
     all_public_dns_names = [instance.public_dns_name 
                             for instance in all_running_instances]
-    for public_dns_name in cluster_public_dns_names:
+    for public_dns_name in public_dns_names(cluster_name):
         j = all_public_dns_names.index(public_dns_name)
         instance = all_running_instances[j]
         ec2_conn.terminate_instances([instance.id ])
