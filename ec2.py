@@ -266,7 +266,10 @@ def start():
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    cmd = sys.argv[1]
+    try:
+        cmd = args[0]
+    except:
+        cmd = None
     l = len(args)
     if cmd=="create" and l==4:
         create(args[1], int(args[2]), args[3])
