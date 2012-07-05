@@ -55,7 +55,7 @@ Future usage:
 
     Indices of the machines to kill in CLUSTER_NAME.
 
-To export an additiona method:
+To export an additional method:
 
     ec2.boto_object(CLUSTER_NAME, index=0)
 
