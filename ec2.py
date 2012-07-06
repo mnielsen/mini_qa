@@ -108,6 +108,18 @@ check_environment_variables_exist(
     "AWS_ACCESS_KEY_ID", 
     "AWS_SECRET_ACCESS_KEY")
 
+class Cluster():
+
+    def __init__(self, cluster_name, boto_instances):
+        self.cluster_name = cluster_name
+        self.instances = [Instance(boto_instance) 
+                          for boto_instance in boto_instances]
+
+class Instance():
+
+    def __init__(self, boto_instance):
+        self.id = boto_instance.id
+        self.public_dns_name = boto_instance.public_dns_name
 
 # The global variable `clusters` defined below is a persistent shelf
 # which is used to represent all the clusters.  Note that it's
@@ -115,18 +127,7 @@ check_environment_variables_exist(
 # state.
 #
 # The keys in `clusters` are the `cluster_names`, and values represent
-# cluster objects.  The cluster objects are just lists of objects
-# representing instances.  And instance objects are `dict`s with two
-# keys, `id` and `public_dns_name`, representing the Amazon EC2 `id`
-# and the public dns name, respectively.
-#
-# I considered implementing the cluster and instance objects using
-# Python classes.  However, this creates problems. The reason is that
-# the logic around persistence of a cluster or instance had to take
-# place _outside_ the class, while the logic around starting and
-# stopping EC2 instances took place within the class.  This separated
-# the persistence logic from the EC2 logic, which seemed like a bad
-# idea.
+# cluster objects.  
 clusters = shelve.open("ec2.shelf")
 
 ec2_conn = EC2Connection(os.environ["AWS_ACCESS_KEY_ID"], 
@@ -151,7 +152,7 @@ def public_dns_names(cluster_name):
         sys.exit()
     else:
         cluster = clusters[cluster_name]
-        return [instance["public_dns_name"] for instance in cluster]
+        return [instance.public_dns_name for instance in cluster.instances]
 
 def create(cluster_name, n, instance_type):
     """
@@ -179,10 +180,7 @@ def create(cluster_name, n, instance_type):
             time.sleep(1)
     time.sleep(120) # Give the ssh daemon time to start
     # Update clusters
-    cluster = [{"id": instance.id,
-                "public_dns_name": instance.public_dns_name}
-               for instance in reservation.instances]
-    clusters[cluster_name] = cluster
+    clusters[cluster_name] = Cluster(reservation.instances)
     clusters.close()
 
 def show_all():
@@ -205,8 +203,8 @@ def show(cluster_name):
         sys.exit()
     print "Instances in cluster %s:" % cluster_name
     cluster = clusters[cluster_name]
-    for (j, instance) in enumerate(cluster):
-        print "%s: %s" % (j, instance["public_dns_name"])
+    for (j, instance) in enumerate(cluster.instances):
+        print "%s: %s" % (j, instance.public_dns_name)
 
 def shutdown(cluster_name):
     """
@@ -218,7 +216,7 @@ def shutdown(cluster_name):
         sys.exit()
     print "Shutting down cluster %s." % cluster_name
     ec2_conn.terminate_instances(
-        [instance.id for instance in clusters[cluster_name]])
+        [instance.id for instance in clusters[cluster_name].instances])
     del clusters[cluster_name]
     clusters.close()
 
@@ -242,7 +240,7 @@ def login(cluster_name, instance_index):
         sys.exit()
     cluster = clusters[cluster_name]
     try:
-        instance = cluster[instance_index]
+        instance = cluster.instances[instance_index]
     except IndexError:
         print ("The instance index must be in the range 0 to %s. Exiting." %
                len(cluster)-1)
