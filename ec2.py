@@ -230,7 +230,7 @@ def show_all():
     Print the details of all clusters to stdout.
     """
     if len(clusters) == 0:
-        print "No clusters present.  Exiting."
+        print "No clusters present."
         sys.exit()
     print "Showing all clusters."
     for cluster_name in clusters:
