@@ -273,7 +273,9 @@ def login(cluster_name, instance_index):
 def kill(cluster_name, instance_index):
     """
     Shutdown instance `instance_index` in cluster `cluster_name`, and
-    remove from the `clusters` shelf.
+    remove from the `clusters` shelf.  If we're killing off the last
+    machine in the cluster then it runs `shutdown(cluster_name)`
+    instead.
     """
     if cluster_name not in clusters:
         print "No cluster with the name %s exists.  Exiting." % cluster_name
@@ -281,7 +283,11 @@ def kill(cluster_name, instance_index):
     cluster = clusters[cluster_name]
     if instance_index < 0 or instance_index >= len(cluster.instances):
         print ("The instance index must be between 0 and %s.  Exiting." %
-               len(cluster.instances)-1)
+               (len(cluster.instances)-1,))
+        sys.exit()
+    if len(cluster.instances)==1:
+        print "Last machine in cluster, shutting down entire cluster."
+        shutdown(cluster_name)
         sys.exit()
     print ("Shutting down instance %s on cluster %s." % 
            (instance_index, cluster_name))
