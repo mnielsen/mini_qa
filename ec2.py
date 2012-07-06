@@ -129,7 +129,7 @@ check_environment_variables_exist(
 # The keys in `clusters` are the `cluster_names`, and the values will
 # be Cluster objects, defined below, which represent named EC2
 # clusters.
-clusters = shelve.open("ec2.shelf")
+clusters = shelve.open("ec2.shelf", writeback=True)
 
 class Cluster():
     """
@@ -278,12 +278,6 @@ def kill(cluster_name, instance_index):
     if cluster_name not in clusters:
         print "No cluster with the name %s exists.  Exiting." % cluster_name
         sys.exit()
-    # We need to be careful when dealing with clusters[cluster_name].
-    # Because of how shelve internals work, this object can actually
-    # change id when referred to in multiple places in the program.
-    # For that reason we introduce a new variable, cluster, bound to
-    # one object id.  We then mutate that, and at the end reassign it
-    # to clusters[cluster_name].
     cluster = clusters[cluster_name]
     if instance_index < 0 or instance_index >= len(cluster.instances):
         print ("The instance index must be between 0 and %s.  Exiting." %
