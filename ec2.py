@@ -1,7 +1,9 @@
 """
 ec2.py
 ~~~~~~
-Simple EC2 cluster management with Python.
+
+Simple EC2 cluster management with Python. Designed for easy
+integration with `fabric`.
 
 Mostly a convenience wrapper around the boto library.  
 
@@ -133,6 +135,15 @@ ec2_conn = EC2Connection(os.environ["AWS_ACCESS_KEY_ID"],
 def public_dns_names(cluster_name):
     """
     Return a list containing the public dns names for `cluster_name`.
+
+    This is returned in a format which is designed to be used in a
+    `fabric` fabfile.  In particular, we can tell `fabric` about the
+    cluster by importing `ec2` in our fabfile, and then putting the
+    line:
+
+    `env.hosts = ec2.public_dns_names(CLUSTER_NAME)`
+        
+    into the fabfile.
     """
     if cluster_name not in clusters:
         print ("Cluster name %s not recognized.  Exiting ec2.ec2_hosts()." %
