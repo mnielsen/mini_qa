@@ -108,27 +108,42 @@ check_environment_variables_exist(
     "AWS_ACCESS_KEY_ID", 
     "AWS_SECRET_ACCESS_KEY")
 
-class Cluster():
-
-    def __init__(self, cluster_name, boto_instances):
-        self.cluster_name = cluster_name
-        self.instances = [Instance(boto_instance) 
-                          for boto_instance in boto_instances]
-
-class Instance():
-
-    def __init__(self, boto_instance):
-        self.id = boto_instance.id
-        self.public_dns_name = boto_instance.public_dns_name
 
 # The global variable `clusters` defined below is a persistent shelf
 # which is used to represent all the clusters.  Note that it's
 # naturally a global object because it represents a global external
 # state.
 #
-# The keys in `clusters` are the `cluster_names`, and values represent
-# cluster objects.  
+# The keys in `clusters` are the `cluster_names`, and the values will
+# be Cluster objects, defined below, which represent named EC2
+# clusters.
 clusters = shelve.open("ec2.shelf")
+
+class Cluster():
+    """
+    Cluster objects represent a named EC2 cluster.  This class does
+    relatively little, it exists mostly to encapsulate the data
+    structures used to represent clusters.
+    """
+
+    def __init__(self, cluster_name, boto_instances):
+        self.cluster_name = cluster_name
+        self.instances = [Instance(boto_instance) 
+                          for boto_instance in boto_instances]
+
+
+class Instance():
+    """
+    Instance objects represent EC2 instances in a Cluster object.  As
+    with Cluster, this class does relatively little, it exists mostly
+    to encapsulate the data structures used to represent instances.
+    """
+
+    def __init__(self, boto_instance):
+        self.id = boto_instance.id
+        self.public_dns_name = boto_instance.public_dns_name
+
+
 
 ec2_conn = EC2Connection(os.environ["AWS_ACCESS_KEY_ID"], 
                          os.environ["AWS_SECRET_ACCESS_KEY"])
@@ -180,7 +195,7 @@ def create(cluster_name, n, instance_type):
             time.sleep(1)
     time.sleep(120) # Give the ssh daemon time to start
     # Update clusters
-    clusters[cluster_name] = Cluster(reservation.instances)
+    clusters[cluster_name] = Cluster(cluster_name, reservation.instances)
     clusters.close()
 
 def show_all():
