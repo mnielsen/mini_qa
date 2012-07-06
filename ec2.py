@@ -42,6 +42,20 @@ Usage from the command line:
 
     Login to CLUSTER_NAME, to the instance with index n (default 0).
 
+
+    python ec2.py kill CLUSTER_NAME n
+
+    Kill the instance with index n in CLUSTER_NAME.  If it's the last
+    instance in the cluster, shuts the cluster down entirely.
+
+
+    python ec2.py add CLUSTER_NAME n
+
+    Add n extra instances to CLUSTER_NAME.  Those instances are of the
+    same instance type as the cluster as a whole.
+
+
+
 Integration with Fabric
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -58,16 +72,6 @@ Integration with Fabric
 Future expansion
 ~~~~~~~~~~~~~~~~
 
-Future usage:
-
-    python ec2.py add CLUSTER_NAME n
-
-    Add n extra machines to CLUSTER_NAME.
-
-
-    python ec2.py kill CLUSTER_NAME [n1 n2 n3...]
-
-    Indices of the machines to kill in CLUSTER_NAME.
 
 To export an additional method:
 
@@ -144,6 +148,12 @@ class Cluster():
         self.instances = [Instance(boto_instance) 
                           for boto_instance in boto_instances]
 
+    def add(self, boto_instances):
+        """
+        Add extra instances to the cluster.
+        """
+        self.instances.append([Instance(boto_instance) 
+                               for boto_instance in boto_instances])
 
 class Instance():
     """
@@ -298,6 +308,32 @@ def kill(cluster_name, instance_index):
     clusters[cluster_name] = cluster
     clusters.close()
 
+def add(cluster_name, n):
+    """
+    Add `n` instances to `cluster_name`, of the same instance type as
+    the other instances already in the cluster.
+    """
+    if cluster_name not in clusters:
+        print "No cluster with the name %s exists.  Exiting." % cluster_name
+        sys.exit()
+    cluster = clusters[cluster_name]
+    if n < 1:
+        print "Must be adding at least 1 instance to the cluster.  Exiting."
+        sys.exit()
+    ami = AMIS[cluster.instance_type]
+    # Create EC2 instances
+    image = ec2_conn.get_all_images(image_ids=[ami])[0]
+    reservation = image.run(
+        n, n, os.environ["AWS_KEYPAIR"], instance_type=cluster.instance_type)
+    for instance in reservation.instances:  # Wait for the cluster to come up
+        while instance.update()== u'pending':
+            time.sleep(1)
+    time.sleep(120) # Give the ssh daemon time to start
+    # Update clusters
+    cluster.add(reservation.instances)
+    clusters[cluster_name] = cluster
+    clusters.close()
+
 def ssh(instances, cmd, background=False):
     """
     Run ``cmd`` on the command line on ``instances``.  Runs in the
@@ -359,6 +395,8 @@ if __name__ == "__main__":
         login(args[1], int(args[2]))
     elif cmd=="kill" and l==3:
         kill(args[1], int(args[2]))
+    elif cmd=="add" and l==3:
+        add(args[1], int(args[2]))
     elif cmd=="ssh" and (l==2 or l==3):
         cluster.ssh(args[1:])
     else:
