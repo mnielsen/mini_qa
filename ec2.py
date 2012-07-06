@@ -190,11 +190,11 @@ def show_all():
     Print the details of all clusters to stdout.
     """
     if len(clusters) == 0:
-        print "No clusters present."
-    else:
-        print "Showing all clusters."
-        for cluster_name in clusters:
-            show(cluster_name)
+        print "No clusters present.  Exiting."
+        sys.exit()
+    print "Showing all clusters."
+    for cluster_name in clusters:
+        show(cluster_name)
 
 def show(cluster_name):
     """
@@ -228,10 +228,10 @@ def shutdown_all():
     clusters from the `clusters` shelf.
     """
     if len(clusters) == 0:
-        print "No clusters to shut down."
-    else:
-        for cluster_name in clusters:
-            shutdown(cluster_name)
+        print "No clusters to shut down.  Exiting."
+        sys.exit()
+    for cluster_name in clusters:
+        shutdown(cluster_name)
 
 def login(cluster_name, instance_index):
     """
@@ -246,6 +246,7 @@ def login(cluster_name, instance_index):
     except IndexError:
         print ("The instance index must be in the range 0 to %s. Exiting." %
                len(cluster)-1)
+        sys.exit()
     print "SSHing to instance with address %s" % (instance.public_dns_name)
     keypair = "%s/%s.pem" % (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])
     os.system("ssh -i %s ubuntu@%s" % (keypair, instance.public_dns_name))
@@ -290,11 +291,11 @@ def start():
 
 if __name__ == "__main__":
     args = sys.argv[1:]
+    l = len(args)
     try:
         cmd = args[0]
     except:
         cmd = None
-    l = len(args)
     if cmd=="create" and l==4:
         create(args[1], int(args[2]), args[3])
     elif cmd=="show_all" and l==1:
