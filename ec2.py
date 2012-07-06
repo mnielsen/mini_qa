@@ -152,7 +152,7 @@ class Cluster():
         """
         Add extra instances to the cluster.
         """
-        self.instances.append([Instance(boto_instance) 
+        self.instances.extend([Instance(boto_instance) 
                                for boto_instance in boto_instances])
 
 class Instance():
@@ -202,8 +202,20 @@ def create(cluster_name, n, instance_type):
     if not instance_type in AMIS:
         print "Instance type not recognized, setting it to be 'm1.small'."
         instance_type = "m1.small"
+    # Create the EC2 instances
+    instances = create_ec2_instances(n, instance_type)
+    # Update clusters
+    clusters[cluster_name] = Cluster(cluster_name, instance_type, instances)
+    clusters.close()
+
+def create_ec2_instances(n, instance_type):
+    """
+    Create an EC2 cluster with `n` instances of type `instance_type`.
+    Return the corresponding boto `reservation.instances` object.
+    This code is used by both the `create` and `add` functions, which
+    is why it was factored out.
+    """
     ami = AMIS[instance_type]
-    # Create EC2 instances
     image = ec2_conn.get_all_images(image_ids=[ami])[0]
     reservation = image.run(
         n, n, os.environ["AWS_KEYPAIR"], instance_type=instance_type)
@@ -211,10 +223,7 @@ def create(cluster_name, n, instance_type):
         while instance.update()== u'pending':
             time.sleep(1)
     time.sleep(120) # Give the ssh daemon time to start
-    # Update clusters
-    clusters[cluster_name] = Cluster(
-        cluster_name, instance_type, reservation.instances)
-    clusters.close()
+    return reservation.instances
 
 def show_all():
     """
@@ -320,17 +329,10 @@ def add(cluster_name, n):
     if n < 1:
         print "Must be adding at least 1 instance to the cluster.  Exiting."
         sys.exit()
-    ami = AMIS[cluster.instance_type]
-    # Create EC2 instances
-    image = ec2_conn.get_all_images(image_ids=[ami])[0]
-    reservation = image.run(
-        n, n, os.environ["AWS_KEYPAIR"], instance_type=cluster.instance_type)
-    for instance in reservation.instances:  # Wait for the cluster to come up
-        while instance.update()== u'pending':
-            time.sleep(1)
-    time.sleep(120) # Give the ssh daemon time to start
+    # Create the EC2 instances
+    instances = create_ec2_instances(n, cluster.instance_type)
     # Update clusters
-    cluster.add(reservation.instances)
+    cluster.add(instances)
     clusters[cluster_name] = cluster
     clusters.close()
 
