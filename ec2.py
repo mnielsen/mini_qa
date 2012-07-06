@@ -42,6 +42,18 @@ Usage from the command line:
 
     Login to CLUSTER_NAME, to the instance with index n (default 0).
 
+Integration with Fabric
+~~~~~~~~~~~~~~~~~~~~~~~
+
+    The function `ec2.public_dns_names(cluster_name)` is designed to
+    make integration with Fabric easy.  In particular, we can tell
+    `fabric` about the cluster by importing `ec2` in our fabfile, and
+    then putting the line:
+
+    `env.hosts = ec2.public_dns_names(CLUSTER_NAME)`
+        
+    into the fabfile.
+
 
 Future expansion
 ~~~~~~~~~~~~~~~~
@@ -152,14 +164,8 @@ def public_dns_names(cluster_name):
     """
     Return a list containing the public dns names for `cluster_name`.
 
-    This is returned in a format which is designed to be used in a
-    `fabric` fabfile.  In particular, we can tell `fabric` about the
-    cluster by importing `ec2` in our fabfile, and then putting the
-    line:
-
-    `env.hosts = ec2.public_dns_names(CLUSTER_NAME)`
-        
-    into the fabfile.
+    See the docstring for this module to see how this enables easy
+    integration with Fabric.
     """
     if cluster_name not in clusters:
         print ("Cluster name %s not recognized.  Exiting ec2.ec2_hosts()." %
@@ -264,6 +270,32 @@ def login(cluster_name, instance_index):
     keypair = "%s/%s.pem" % (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])
     os.system("ssh -i %s ubuntu@%s" % (keypair, instance.public_dns_name))
 
+def kill(cluster_name, instance_index):
+    """
+    Shutdown instance `instance_index` in cluster `cluster_name`, and
+    remove from the `clusters` shelf.
+    """
+    if cluster_name not in clusters:
+        print "No cluster with the name %s exists.  Exiting." % cluster_name
+        sys.exit()
+    # We need to be careful when dealing with clusters[cluster_name].
+    # Because of how shelve internals work, this object can actually
+    # change id when referred to in multiple places in the program.
+    # For that reason we introduce a new variable, cluster, bound to
+    # one object id.  We then mutate that, and at the end reassign it
+    # to clusters[cluster_name].
+    cluster = clusters[cluster_name]
+    if instance_index < 0 or instance_index >= len(cluster.instances):
+        print ("The instance index must be between 0 and %s.  Exiting." %
+               len(cluster.instances)-1)
+        sys.exit()
+    print ("Shutting down instance %s on cluster %s." % 
+           (instance_index, cluster_name))
+    ec2_conn.terminate_instances([cluster.instances[instance_index].id])
+    del cluster.instances[instance_index]
+    clusters[cluster_name] = cluster
+    clusters.close()
+
 def ssh(instances, cmd, background=False):
     """
     Run ``cmd`` on the command line on ``instances``.  Runs in the
@@ -323,6 +355,8 @@ if __name__ == "__main__":
         login(args[1], 0)
     elif cmd=="login" and l==3:
         login(args[1], int(args[2]))
+    elif cmd=="kill" and l==3:
+        kill(args[1], int(args[2]))
     elif cmd=="ssh" and (l==2 or l==3):
         cluster.ssh(args[1:])
     else:
