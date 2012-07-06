@@ -10,19 +10,20 @@ Usage from the command line:
     python ec2.py create CLUSTER_NAME n type 
 
     Create a cluster with name `CLUSTER_NAME`, containing `n` machines
-    of type `type`.
+    of type `type`.  The allowed types are `m1.small`, `c1.medium`,
+    `m1.large`, `m1.xlarge`, `m2.xlarge`, `m2.2xlarge`, `m2.4xlarge`,
+    `c1.xlarge`, `cc1.4xlarge`.
 
 
     python ec2.py show_all
 
-    Shows names of all clusters currently running, and some basic data
-    about each cluster.
+    Run the `show` command for all clusters now running.
 
 
     python ec2.py show CLUSTER_NAME
 
-    Show details of named cluster, including the type of machines,
-    indices for all machines, DNS, and instance numbers.
+    Show details of named cluster, including indices for all machines,
+    the public domain name, and the instance type.
 
 
     python ec2.py shutdown CLUSTER_NAME
@@ -37,8 +38,7 @@ Usage from the command line:
 
     python ec2.py login CLUSTER_NAME [n]
 
-    Login to CLUSTER_NAME, to the instance with optional index n 
-    (default 0).
+    Login to CLUSTER_NAME, to the instance with index n (default 0).
 
 
 Future expansion
@@ -64,7 +64,6 @@ To export an additional method:
 """
 
 # Standard library
-import cPickle
 import os
 import shelve
 import subprocess
@@ -86,11 +85,11 @@ AMIS = {"m1.small" : "ami-e2af508b",
         "cc1.4xlarge" : "ami-1cad5275"
         }
 
-#### Check that the environment variables we need all exist
+#### Check that required the environment variables exist
 def check_environment_variables_exist(*args):
     """
-    Check that the environment variables in `*args` all exist.  If any
-    do not, print an error message and exit.
+    Check that the environment variables in `*args` have all been
+    defined.  If any do not, print an error message and exit.
     """
     vars_exist = True
     for var in args:
@@ -101,32 +100,40 @@ def check_environment_variables_exist(*args):
         print "Exiting"
         sys.exit()
 
-check_environment_variables_exist("AWS_HOME", "AWS_KEYPAIR",
-                                  "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY")
+check_environment_variables_exist(
+    "AWS_HOME", 
+    "AWS_KEYPAIR",
+    "AWS_ACCESS_KEY_ID", 
+    "AWS_SECRET_ACCESS_KEY")
 
 
-# Persistent shelf, used to represent all the clusters.  The keys are
-# the cluster_names, and values represent cluster objects.  The
-# cluster objects are just lists of objects representing instances.
-# And instance objects are `dict`s with two keys, `id` and
-# `public_dns_name`, representing the Amazon EC2 `id` and the public
-# dns name, respectively.
+# The global variable `clusters` defined below is a persistent shelf
+# which is used to represent all the clusters.  Note that it's
+# naturally a global object because it represents a global external
+# state.
+#
+# The keys in `clusters` are the `cluster_names`, and values represent
+# cluster objects.  The cluster objects are just lists of objects
+# representing instances.  And instance objects are `dict`s with two
+# keys, `id` and `public_dns_name`, representing the Amazon EC2 `id`
+# and the public dns name, respectively.
 #
 # I considered implementing the cluster and instance objects using
 # Python classes.  However, this creates problems. The reason is that
 # the logic around persistence of a cluster or instance had to take
 # place _outside_ the class, while the logic around starting and
-# stopping EC2 instances took place within.  This separated the
-# persistence logic from the EC2 logic, which seemed like a bad idea.
-#
-# Note that clusters is a global object because it repreent a global
-# external state.
+# stopping EC2 instances took place within the class.  This separated
+# the persistence logic from the EC2 logic, which seemed like a bad
+# idea.
 clusters = shelve.open("ec2.shelf")
 
 ec2_conn = EC2Connection(os.environ["AWS_ACCESS_KEY_ID"], 
                          os.environ["AWS_SECRET_ACCESS_KEY"])
 
 def public_dns_names(cluster_name):
+    """
+    Return a list containing the public dns names for `cluster_name`.
+    """
     if cluster_name not in clusters:
         print ("Cluster name %s not recognized.  Exiting ec2.ec2_hosts()." %
                cluster_name)
@@ -138,7 +145,8 @@ def public_dns_names(cluster_name):
 def create(cluster_name, n, instance_type):
     """
     Create an EC2 cluster with name `cluster_name`, and `n` instances
-    of type `instance_type`.
+    of type `instance_type`.  Update the `clusters` shelf to include a
+    description of the new cluster.
     """
     # Parameter check
     if cluster_name in clusters:
@@ -167,6 +175,9 @@ def create(cluster_name, n, instance_type):
     clusters.close()
 
 def show_all():
+    """
+    Print the details of all clusters to stdout.
+    """
     if len(clusters) == 0:
         print "No clusters present."
     else:
@@ -175,6 +186,9 @@ def show_all():
             show(cluster_name)
 
 def show(cluster_name):
+    """
+    Print the details of cluster `cluster_name` to stdout.
+    """
     if cluster_name not in clusters:
         print "No cluster with the name %s exists.  Exiting." % cluster_name
         sys.exit()
@@ -184,31 +198,24 @@ def show(cluster_name):
         print "%s: %s" % (j, instance["public_dns_name"])
 
 def shutdown(cluster_name):
+    """
+    Shutdown all EC2 instances in `cluster_name`, and remove
+    `cluster_name` from ` the `clusters` shelf.
+    """
     if cluster_name not in clusters:
         print "No cluster with the name %s exists.  Exiting." % cluster_name
         sys.exit()
     print "Shutting down cluster %s." % cluster_name
-    all_running_instances = get_running_instances()
-    all_public_dns_names = [instance.public_dns_name 
-                            for instance in all_running_instances]
-    for public_dns_name in public_dns_names(cluster_name):
-        j = all_public_dns_names.index(public_dns_name)
-        instance = all_running_instances[j]
-        ec2_conn.terminate_instances([instance.id ])
+    ec2_conn.terminate_instances(
+        [instance.id for instance in clusters[cluster_name]])
     del clusters[cluster_name]
     clusters.close()
 
-def get_running_instances():
-    """
-    Return all the running EC2 instances.
-    """
-    reservations = ec2_conn.get_all_instances()
-    running_instances = [instance for reservation in reservations
-                         for instance in reservation.instances 
-                         if instance.update() == u"running"]
-    return running_instances
-
 def shutdown_all():
+    """
+    Shutdown all EC2 instances in all clusters, and remove all
+    clusters from the `clusters` shelf.
+    """
     if len(clusters) == 0:
         print "No clusters to shut down."
     else:
