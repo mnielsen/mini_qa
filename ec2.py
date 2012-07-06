@@ -243,10 +243,14 @@ def show(cluster_name):
     if cluster_name not in clusters:
         print "No cluster with the name %s exists.  Exiting." % cluster_name
         sys.exit()
-    print "Instances in cluster %s:" % cluster_name
     cluster = clusters[cluster_name]
+    print "Displaying instances from cluster: %s" % cluster_name
+    print "Instances of type: %s" % cluster.instance_type
+    print "{0:8}{1:13}{2:35}".format(
+        "index", "EC2 id", "public dns name")
     for (j, instance) in enumerate(cluster.instances):
-        print "%s: %s" % (j, instance.public_dns_name)
+        print "{0:8}{1:13}{2:35}".format(
+            str(j), instance.id, instance.public_dns_name)
 
 def shutdown(cluster_name):
     """
