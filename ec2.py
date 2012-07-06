@@ -138,8 +138,9 @@ class Cluster():
     structures used to represent clusters.
     """
 
-    def __init__(self, cluster_name, boto_instances):
+    def __init__(self, cluster_name, instance_type, boto_instances):
         self.cluster_name = cluster_name
+        self.instance_type = instance_type
         self.instances = [Instance(boto_instance) 
                           for boto_instance in boto_instances]
 
@@ -201,7 +202,8 @@ def create(cluster_name, n, instance_type):
             time.sleep(1)
     time.sleep(120) # Give the ssh daemon time to start
     # Update clusters
-    clusters[cluster_name] = Cluster(cluster_name, reservation.instances)
+    clusters[cluster_name] = Cluster(
+        cluster_name, instance_type, reservation.instances)
     clusters.close()
 
 def show_all():
