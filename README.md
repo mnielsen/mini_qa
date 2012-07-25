@@ -18,7 +18,9 @@ and
 
 # Installation and useage
 
-To be added.
+To be added.  Note that `mini_qa` was written with the `v0.01` version
+of `ec2_tools` in mind:
+[code available here](https://github.com/mnielsen/ec2_tools/tree/v0.01).
 
 # Note on contributions and pull requests
 

@@ -20,12 +20,19 @@ from fabric.contrib.console import confirm
 
 # My libraries
 import config
-import ec2
+import ec2.ec2 as ec2
 
 env.hosts = ec2.public_dns_names("mini_qa")
 env.user = 'ubuntu'
 env.key_filename = ["%s/%s.pem" % \
                         (os.environ["AWS_HOME"], os.environ["AWS_KEYPAIR"])]
+
+def start():
+    """
+    Create an EC2 instance, set it up, and login.
+    """
+    first_deploy()
+    ec2.login("mini_qa", 0)
 
 def first_deploy():
     """
