@@ -24,18 +24,7 @@ of `ec2_tools` in mind:
 
 # Note on contributions and pull requests
 
-Bug fixes are welcome.
-
-This program is a toy, and I'm using it purely for illustrative
-purposes on my blog, so I don't plan to accept pull requests that add
-features.  But feel free to fork and add features --- the beauty of
-AskMSR is that it's an easy system to extend. 
-
-If you have comments or suggestions about the style of the main
-program (`mini_qa.py`), I'd like to hear them.  Leave them on the
-issue tracker, or email me (mn@michaelnielsen.org).  By contast,
-`test_mini_qa.py` is more of a quick-and-dirty kludge, so I'm not
-looking for feedback on that code.
+I am no longer maintaining the code at all (2017).
 
 # Copyright and licensing
 
